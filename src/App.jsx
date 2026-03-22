@@ -1,22 +1,121 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 // ═══════════════════════════════════════════════════════════
-// DESIGN TOKENS
+// DESIGN TOKENS - GALAXY THEME
 // ═══════════════════════════════════════════════════════════
 const C = {
-  bg: "#070b14",
-  surface: "#0d1424",
-  card: "#111d2e",
-  cardHover: "#152236",
-  border: "#1a2d45",
-  accent: "#00c8ff",
-  accent2: "#a855f7",
-  accent3: "#10d98a",
-  warn: "#f59e0b",
+  bg: "#05030f",
+  surface: "#0a0820",
+  card: "#0f0d28",
+  cardHover: "#141235",
+  border: "#2a1f5e",
+  accent: "#a78bfa",
+  accent2: "#f472b6",
+  accent3: "#34d399",
+  warn: "#fbbf24",
   danger: "#f43f5e",
-  text: "#e8f0fe",
-  muted: "#5a7499",
-  soft: "#8ba4c4",
+  text: "#e9e4ff",
+  muted: "#6b5fa8",
+  soft: "#a394d4",
+};
+
+// ═══════════════════════════════════════════════════════════
+// GALAXY BACKGROUND
+// ═══════════════════════════════════════════════════════════
+const GalaxyBackground = () => {
+  const stars = Array.from({ length: 130 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: Math.random() * 2.5 + 0.5,
+    opacity: Math.random() * 0.8 + 0.2,
+    delay: Math.random() * 4,
+    duration: Math.random() * 3 + 2,
+  }));
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 20% 30%, #1a0a3d 0%, #0a0520 40%, #05030f 100%)" }} />
+      <div style={{ position: "absolute", top: "-10%", left: "-10%", width: "55%", height: "55%", background: "radial-gradient(ellipse, rgba(120,60,200,0.18) 0%, transparent 70%)", filter: "blur(40px)", animation: "nebulaDrift 20s ease-in-out infinite alternate" }} />
+      <div style={{ position: "absolute", bottom: "-10%", right: "-10%", width: "60%", height: "60%", background: "radial-gradient(ellipse, rgba(60,30,160,0.22) 0%, transparent 70%)", filter: "blur(50px)", animation: "nebulaDrift 25s ease-in-out infinite alternate-reverse" }} />
+      <div style={{ position: "absolute", top: "40%", right: "20%", width: "35%", height: "35%", background: "radial-gradient(ellipse, rgba(200,80,180,0.10) 0%, transparent 70%)", filter: "blur(35px)", animation: "nebulaDrift 18s ease-in-out infinite alternate" }} />
+      {stars.map(s => (
+        <div key={s.id} style={{
+          position: "absolute", left: `${s.x}%`, top: `${s.y}%`,
+          width: s.size, height: s.size, borderRadius: "50%",
+          background: s.size > 2 ? "#c4b5fd" : "#e9e4ff",
+          opacity: s.opacity,
+          animation: `twinkle ${s.duration}s ${s.delay}s ease-in-out infinite alternate`,
+          boxShadow: s.size > 2 ? `0 0 ${s.size * 2}px rgba(196,181,253,0.6)` : "none",
+        }} />
+      ))}
+      <style>{`
+        @keyframes twinkle { from { opacity:0.2; transform:scale(0.8); } to { opacity:1; transform:scale(1.2); } }
+        @keyframes nebulaDrift { from { transform:translate(0,0) rotate(0deg); } to { transform:translate(30px,20px) rotate(5deg); } }
+        @keyframes lofiPulse { 0%,100% { box-shadow:0 0 0 0 rgba(167,139,250,0.4),0 0 20px rgba(167,139,250,0.2); } 50% { box-shadow:0 0 0 8px rgba(167,139,250,0),0 0 30px rgba(167,139,250,0.4); } }
+        @keyframes barDance1 { 0%,100%{height:6px} 50%{height:20px} }
+        @keyframes barDance2 { 0%,100%{height:14px} 50%{height:6px} }
+        @keyframes barDance3 { 0%,100%{height:10px} 25%{height:20px} 75%{height:4px} }
+        @keyframes barDance4 { 0%,100%{height:8px} 40%{height:18px} }
+      `}</style>
+    </div>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════
+// LOFI MUSIC BUTTON
+// ═══════════════════════════════════════════════════════════
+const LofiButton = () => {
+  const [playing, setPlaying] = useState(false);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    const audio = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3");
+    audio.loop = true;
+    audio.volume = 0.5;
+    audioRef.current = audio;
+    return () => { audio.pause(); audio.src = ""; };
+  }, []);
+
+  const toggleMusic = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (playing) {
+      audio.pause();
+      setPlaying(false);
+    } else {
+      audio.play().catch(() => {});
+      setPlaying(true);
+    }
+  };
+
+  return (
+    <div onClick={toggleMusic} title={playing ? "עצור מוזיקה" : "הפעל Lo-Fi"}
+      style={{
+        position: "fixed", bottom: 28, left: 28, zIndex: 9999,
+        width: 56, height: 56, borderRadius: "50%",
+        background: playing ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "linear-gradient(135deg,#1a1040,#2d1b69)",
+        border: `2px solid ${playing ? "#a78bfa" : "#4c3a8a"}`,
+        cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+        animation: playing ? "lofiPulse 2s ease-in-out infinite" : "none",
+        transition: "all 0.3s ease", flexDirection: "column", gap: 3,
+      }}>
+      {playing ? (
+        <div style={{ display: "flex", gap: 3, alignItems: "flex-end", height: 22 }}>
+          {["barDance1 0.8s ease-in-out infinite","barDance2 0.9s 0.1s ease-in-out infinite","barDance3 0.7s 0.2s ease-in-out infinite","barDance4 1s 0.05s ease-in-out infinite"].map((anim, i) => (
+            <div key={i} style={{ width: 4, borderRadius: 2, background: "linear-gradient(to top,#f472b6,#c084fc)", animation: anim }} />
+          ))}
+        </div>
+      ) : (
+        <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#4c1d95,#6d28d9)", border: "2px solid #7c3aed", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#a78bfa" }} />
+          <div style={{ position: "absolute", inset: 3, borderRadius: "50%", border: "1px solid rgba(167,139,250,0.3)" }} />
+        </div>
+      )}
+      <div style={{ fontSize: 8, color: playing ? "#e9d5ff" : "#7c6ab0", fontWeight: 700, letterSpacing: 0.5 }}>
+        {playing ? "LO-FI" : "♪"}
+      </div>
+    </div>
+  );
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -297,6 +396,7 @@ int main() {
         q: "מה יהיה הפלט של: int x=7, y=2; printf(\"%d\", x/y);",
         options: ["3.5", "3", "4", "שגיאת קומפילציה"],
         correct: 1,
+        explanation: "חילוק של שני int מחזיר int – השארית נחתכת. 7/2=3.",
       },
       {
         q: "מה ההבדל בין float ל-double?",
@@ -307,26 +407,108 @@ int main() {
           "float לא קיים ב-C",
         ],
         correct: 1,
+        explanation: "float תופס 4 בתים ומדויק עד ~7 ספרות, double תופס 8 בתים ומדויק עד ~15 ספרות.",
       },
       {
         q: "מה הפלט של: int x=5; printf(\"%d\", x++);",
         options: ["6", "5", "שגיאה", "4"],
         correct: 1,
+        explanation: "x++ הוא postfix – קודם מחזיר את הערך הנוכחי (5) ואז מגדיל ל-6.",
       },
       {
         q: "מה מחזיר sizeof(double)?",
         options: ["4", "2", "8", "16"],
         correct: 2,
+        explanation: "double תופס 8 בתים בזיכרון.",
       },
       {
         q: "מה הפלט של: printf(\"%d\", 10 % 3);",
         options: ["3", "1", "0", "3.33"],
         correct: 1,
+        explanation: "% מחשב שארית: 10 = 3×3 + 1, לכן השארית היא 1.",
       },
       {
         q: "כדי לחשב שורש ריבועי ב-C, משתמשים ב:",
         options: ["square(x)", "sqrt(x) מ-math.h", "Math.sqrt(x)", "root(x)"],
         correct: 1,
+        explanation: "sqrt(x) היא פונקציה מ-math.h. צריך גם לקמפל עם -lm.",
+      },
+      {
+        q: "מה הפלט של: int x=5; int a=++x; printf(\"%d %d\", a, x);",
+        options: ["5 6", "6 6", "5 5", "6 5"],
+        correct: 1,
+        explanation: "++x הוא prefix – קודם מגדיל x ל-6, ואז מציב את הערך החדש ב-a. לכן a=6, x=6.",
+      },
+      {
+        q: "מה יהיה הפלט: int a=7, b=2; double r=(double)a/b; printf(\"%.1f\", r);",
+        options: ["3.0", "3.5", "4.0", "0.0"],
+        correct: 1,
+        explanation: "casting של a ל-double לפני החילוק גורם לחילוק ממשי: 7.0/2=3.5.",
+      },
+      {
+        q: "מה ערכו של: (int)3.9?",
+        options: ["4", "3", "3.9", "שגיאה"],
+        correct: 1,
+        explanation: "casting מ-double ל-int חותך את החלק העשרוני (לא מעגל). 3.9 → 3.",
+      },
+      {
+        q: "מה ייצוג enum Day { MON=1, TUE, WED }? ערך WED הוא:",
+        options: ["0", "1", "2", "3"],
+        correct: 3,
+        explanation: "MON=1, TUE=2 (MON+1), WED=3 (TUE+1). enum מקצה ערכים עוקבים אוטומטית.",
+      },
+      {
+        q: "מה הפלט של: printf(\"%d\", 2 + 3 * 4);",
+        options: ["20", "14", "24", "9"],
+        correct: 1,
+        explanation: "כפל מחושב לפני חיבור (סדר עדיפויות). 3*4=12, ואז 2+12=14.",
+      },
+      {
+        q: "מה גודל char בבתים?",
+        options: ["2", "4", "1", "8"],
+        correct: 2,
+        explanation: "char תמיד תופס בית אחד (1 byte) בשפת C.",
+      },
+      {
+        q: "מה הפלט: int x=10; x += 5; x *= 2; printf(\"%d\", x);",
+        options: ["25", "30", "20", "35"],
+        correct: 1,
+        explanation: "x=10, x+=5 → x=15, x*=2 → x=30.",
+      },
+      {
+        q: "מה מחזירה rand() % 10?",
+        options: ["מספר 0-10", "מספר 0-9", "מספר 1-10", "תמיד אותו מספר"],
+        correct: 1,
+        explanation: "% 10 מחזיר שארית מ-0 עד 9 (10 אפשרויות). כדי לקבל 1-10 נוסיף +1.",
+      },
+      {
+        q: "מה הפלט של: printf(\"%d\", sizeof(int) * 2);",
+        options: ["4", "8", "2", "16"],
+        correct: 1,
+        explanation: "sizeof(int)=4, ו-4*2=8.",
+      },
+      {
+        q: "מה הפלט: float x=1.0f/3.0f; printf(\"%.2f\", x);",
+        options: ["0.33", "0.00", "1.00", "שגיאה"],
+        correct: 0,
+        explanation: "1.0f/3.0f=0.3333... ועם %.2f מקבלים עיגול לשתי ספרות: 0.33.",
+      },
+      {
+        q: "מה תפקיד typedef?",
+        options: [
+          "מגדיר פונקציה חדשה",
+          "יוצר שם חלופי לטיפוס קיים",
+          "מייבא ספרייה",
+          "מגדיר קבוע",
+        ],
+        correct: 1,
+        explanation: "typedef unsigned int uint; יוצר שם uint שמתנהג בדיוק כמו unsigned int.",
+      },
+      {
+        q: "מה הפלט: int x=0; printf(\"%d\", !x);",
+        options: ["0", "1", "-1", "שגיאה"],
+        correct: 1,
+        explanation: "! היא NOT לוגי. 0 נחשב שקר, !0 = 1 (אמת).",
       },
     ],
   },
@@ -542,16 +724,19 @@ int main() {
         q: "מה הפורמט להדפסת מספר ממשי עם בדיוק 3 ספרות אחרי הנקודה?",
         options: ["%3f", "%d.3", "%.3f", "%f(3)"],
         correct: 2,
+        explanation: "%.3f מגדיר 3 ספרות אחרי הנקודה העשרונית.",
       },
       {
         q: "מה הפלט של: printf(\"%o\", 8);",
         options: ["8", "10", "0x8", "1000"],
         correct: 1,
+        explanation: "%o מדפיס בבסיס 8 (אוקטלי). 8 בבסיס 10 = 10 בבסיס 8.",
       },
       {
         q: "מה הפלט של: printf(\"%X\", 255);",
         options: ["255", "ff", "FF", "0xFF"],
         correct: 2,
+        explanation: "%X מדפיס hex עם אותיות גדולות. 255 = FF בהקסה.",
       },
       {
         q: "בקריאת מחרוזת עם scanf, צריך & לפני המשתנה?",
@@ -562,6 +747,7 @@ int main() {
           "כן אבל רק ב-Windows",
         ],
         correct: 1,
+        explanation: "שם מערך char הוא כבר מצביע לאלמנט הראשון. scanf(\"%s\", name) נכון ללא &.",
       },
       {
         q: "מה עושה %-10d בניגוד ל-%10d?",
@@ -572,6 +758,88 @@ int main() {
           "מדפיס ב-hex",
         ],
         correct: 1,
+        explanation: "- לפני רוחב השדה גורם ליישור שמאלה במקום ימינה.",
+      },
+      {
+        q: "מה הפלט של: printf(\"%05d\", 42);",
+        options: ["42   ", "  42 ", "00042", "42000"],
+        correct: 2,
+        explanation: "0 לפני הרוחב ממלא ב-0. רוחב 5 → 00042.",
+      },
+      {
+        q: "מה מחזירה scanf אם היא קוראת בהצלחה 2 ערכים?",
+        options: ["0", "1", "2", "EOF"],
+        correct: 2,
+        explanation: "scanf מחזירה את מספר הפריטים שנקראו בהצלחה.",
+      },
+      {
+        q: "מה הפלט של: printf(\"%+d %+d\", 42, -5);",
+        options: ["42 -5", "+42 -5", "+42 +(-5)", "שגיאה"],
+        correct: 1,
+        explanation: "%+ תמיד מציג סימן. מספר חיובי יקבל +, שלילי יקבל -.",
+      },
+      {
+        q: "איזה escape sequence מייצג טאב?",
+        options: ["\\n", "\\t", "\\r", "\\b"],
+        correct: 1,
+        explanation: "\\t מייצג horizontal tab. \\n שורה חדשה, \\r carriage return.",
+      },
+      {
+        q: "מה קורא getchar()?",
+        options: [
+          "מחרוזת שלמה",
+          "תו בודד מהקלט",
+          "מספר שלם",
+          "שורה שלמה",
+        ],
+        correct: 1,
+        explanation: "getchar() קוראת תו אחד בלבד ומחזירה אותו כ-int.",
+      },
+      {
+        q: "מה הפלט של: printf(\"%e\", 12345.678);",
+        options: ["12345.678", "1.234568e+04", "1.23e+04", "12345.7"],
+        correct: 1,
+        explanation: "%e מדפיס בצורה מעריכית (scientific notation).",
+      },
+      {
+        q: "למה כדאי לכתוב scanf(\" %c\", &c) עם רווח לפני %c?",
+        options: [
+          "לקריאת רווח",
+          "לדילוג על whitespace שנשאר מקריאה קודמת",
+          "לשיפור מהירות",
+          "חובה תמיד",
+        ],
+        correct: 1,
+        explanation: "הרווח לפני %c גורם ל-scanf לדלג על whitespace (כולל Enter) שנשאר מסריקה קודמת.",
+      },
+      {
+        q: "מה הפלט של: printf(\"%8.3f\", 3.14159);",
+        options: ["   3.142", "3.142   ", "3.14159", "3.142"],
+        correct: 0,
+        explanation: "רוחב כולל 8 ו-3 ספרות אחרי הנקודה. 3.142 (4 תווים) + 3 רווחים = 8 תווים, ימין-מיושר.",
+      },
+      {
+        q: "מה יודפס: printf(\"%d\", (int)'A');",
+        options: ["A", "65", "1", "0"],
+        correct: 1,
+        explanation: "ערך ASCII של 'A' הוא 65. casting ל-int מדפיס את הערך המספרי.",
+      },
+      {
+        q: "מה ייצוג פלט: ./program > output.txt?",
+        options: [
+          "קריאת קלט מקובץ",
+          "ניתוב פלט לקובץ",
+          "ניתוב שגיאות",
+          "יצירת קובץ ריק",
+        ],
+        correct: 1,
+        explanation: "> מנתב את stdout לקובץ במקום למסך.",
+      },
+      {
+        q: "מה הפלט: printf(\"%c\", 65);",
+        options: ["65", "A", "שגיאה", "0x41"],
+        correct: 1,
+        explanation: "%c מדפיס את התו שערכו ASCII=65, שהוא האות A.",
       },
     ],
   },
@@ -772,6 +1040,7 @@ int main() {
           "אחרי הבדיקה",
         ],
         correct: 1,
+        explanation: "תכנות נכון: הבן בעיה → אלגוריתם מילולי → פסאודו-קוד → C → בדיקה.",
       },
       {
         q: "מה גישת Top-Down?",
@@ -782,6 +1051,7 @@ int main() {
           "תיעוד לאחר קידוד",
         ],
         correct: 1,
+        explanation: "Top-Down = מתחילים מהמטרה הכוללת ופורקים לחלקים קטנים יותר ויותר.",
       },
       {
         q: "מה חייב לכלול כל אלגוריתם?",
@@ -792,6 +1062,124 @@ int main() {
           "קבצי header",
         ],
         correct: 2,
+        explanation: "אלגוריתם חייב: סופיות (מסתיים), בהירות (כל שלב ברור), לפחות פלט אחד.",
+      },
+      {
+        q: "מה ההבדל בין פסאודו-קוד לקוד C?",
+        options: [
+          "אין הבדל",
+          "פסאודו-קוד הוא שפה ספציפית",
+          "פסאודו-קוד כתוב בשפה חופשית, לא ניתן להרצה",
+          "פסאודו-קוד מהיר יותר",
+        ],
+        correct: 2,
+        explanation: "פסאודו-קוד הוא תיאור לוגי שאינו תלוי בשפת תכנות ואינו ניתן להרצה ישירה.",
+      },
+      {
+        q: "מה ארבעת מנגנוני הבנייה של אלגוריתם?",
+        options: [
+          "פונקציות, מחרוזות, מצביעים, מערכים",
+          "רצף, ענפות, חזרה, תת-אלגוריתמים",
+          "קלט, עיבוד, פלט, בדיקה",
+          "הגדרה, אתחול, חישוב, הדפסה",
+        ],
+        correct: 1,
+        explanation: "ארבעת מנגנוני הבנייה: רצף (sequence), ענפות (selection), חזרה (repetition), תת-אלגוריתמים.",
+      },
+      {
+        q: "מה יתרון פירוק לתת-בעיות?",
+        options: [
+          "קוד ארוך יותר",
+          "שימוש חוזר, קריאות, בדיקה קלה",
+          "הקוד רץ מהר יותר תמיד",
+          "אין יתרון ממשי",
+        ],
+        correct: 1,
+        explanation: "פירוק לתת-בעיות מאפשר: שימוש חוזר (reuse), קריאות, בדיקה בנפרד, חלוקת עבודה.",
+      },
+      {
+        q: "בחישוב BMI (משקל/גובה²), מה תחום הקלט החוקי?",
+        options: [
+          "כל מספר",
+          "גובה וmשקל חיוביים ושאינם אפס",
+          "גובה בין 0 ל-3",
+          "משקל בין 0 ל-200",
+        ],
+        correct: 1,
+        explanation: "גובה ומשקל חייבים להיות חיוביים ממשית. גובה=0 גורם לחלוקה באפס.",
+      },
+      {
+        q: "מה פלט האלגוריתם finalGrade(80, 90) כאשר ציון=70%×מבחן+30%×עבודה?",
+        options: ["85", "83", "80", "86"],
+        correct: 1,
+        explanation: "0.7×80 + 0.3×90 = 56 + 27 = 83.",
+      },
+      {
+        q: "מה השלב שקודם לפסאודו-קוד?",
+        options: [
+          "בדיקה",
+          "מימוש בC",
+          "הבנת הבעיה ואלגוריתם מילולי",
+          "תיעוד",
+        ],
+        correct: 2,
+        explanation: "סדר: הבנה → אלגוריתם מילולי → פסאודו-קוד → מימוש → בדיקה.",
+      },
+      {
+        q: "מה זו גישת Bottom-Up?",
+        options: [
+          "פירוק מהכלל לפרט",
+          "בניית רכיבים קטנים ואיחודם לפתרון גדול",
+          "קידוד מהסוף להתחלה",
+          "בדיקה לפני כתיבה",
+        ],
+        correct: 1,
+        explanation: "Bottom-Up: מתחילים מרכיבים קטנים (תת-בעיות) ומאחדים לפתרון שלם.",
+      },
+      {
+        q: "מה circleArea(5) מחזיר כשπ=3.14159?",
+        options: ["31.4159", "78.5398", "15.7080", "10.0"],
+        correct: 1,
+        explanation: "שטח עיגול = π×r² = 3.14159×25 ≈ 78.5398.",
+      },
+      {
+        q: "מה נדרש מאלגוריתם 'בר-ביצוע' (effective)?",
+        options: [
+          "כל שלב ניתן לביצוע במחשב בזמן סופי",
+          "הקוד מהיר",
+          "ישנן פחות מ-100 פעולות",
+          "ניתן להרצה במקביל",
+        ],
+        correct: 0,
+        explanation: "אפקטיביות = כל פעולה בסיסית ניתנת לביצוע בפועל בזמן סופי.",
+      },
+      {
+        q: "מה הפלט של: double bmi = 70 / (1.75 * 1.75);",
+        options: ["22.86", "22", "0.0", "שגיאה"],
+        correct: 1,
+        explanation: "1.75*1.75=3.0625, 70/3.0625≈22.86. מכיוון שאחד מהאופרנדים double, יבוצע חילוק ממשי.",
+      },
+      {
+        q: "מה ייחודי ב'תת-אלגוריתם' (תת-פרוצדורה)?",
+        options: [
+          "תמיד מחזיר ערך",
+          "פותר חלק מוגדר של הבעיה וניתן לקריאה חוזרת",
+          "רץ באופן אוטומטי",
+          "חייב להיות קצר מ-10 שורות",
+        ],
+        correct: 1,
+        explanation: "תת-אלגוריתם הוא יחידה עצמאית הפותרת תת-בעיה, שניתן לקרוא לה ממקומות שונים.",
+      },
+      {
+        q: "מה ייצוג graphical לאלגוריתם?",
+        options: [
+          "פסאודו-קוד",
+          "דיאגרמת זרימה (flowchart)",
+          "קוד C עם הערות",
+          "טבלת מעקב",
+        ],
+        correct: 1,
+        explanation: "flowchart (דיאגרמת זרימה) היא ייצוג גרפי של אלגוריתם עם סמלים מוסכמים.",
       },
     ],
   },
@@ -1022,9 +1410,10 @@ int main() {
       "כתוב משחק 'אבן-נייר-מספריים': קבל בחירת שני שחקנים (1=אבן, 2=נייר, 3=מספריים), קבע מנצח, הצג הסבר (מספריים חותכות נייר, נייר עוטף אבן, אבן שוברת מספריים).",
     quiz: [
       {
-        q: "מה הפלט של: int x=5; if(x=10) printf('yes'); else printf('no');",
+        q: "מה הפלט של: int x=5; if(x=10) printf(\"yes\"); else printf(\"no\");",
         options: ["no", "yes", "שגיאת קומפילציה", "אין פלט"],
         correct: 1,
+        explanation: "x=10 היא הצבה (לא השוואה!). הצבה מחזירה את הערך 10 (לא-אפס = אמת). לכן תדפיס yes.",
       },
       {
         q: "מה יגרום לfall-through ב-switch?",
@@ -1035,11 +1424,13 @@ int main() {
           "שגיאת syntax",
         ],
         correct: 1,
+        explanation: "ללא break, הביצוע ממשיך לcase הבא ללא בדיקת הערך – זה נקרא fall-through.",
       },
       {
         q: "מה הפלט של: printf(\"%d\", (7>3) && (2<1));",
         options: ["1", "0", "שגיאה", "true"],
         correct: 1,
+        explanation: "(7>3)=1, (2<1)=0. 1&&0=0. && מחזיר 1 רק אם שניהם אמת.",
       },
       {
         q: "מה מגבלת switch ב-C?",
@@ -1050,11 +1441,88 @@ int main() {
           "אין מגבלה",
         ],
         correct: 0,
+        explanation: "switch עובד רק עם int, char, ו-enum. לא ניתן להשתמש ב-float, double, מחרוזות.",
       },
       {
         q: "מה הפלט של: int a=3,b=5; printf(\"%d\", (a>b)?a:b);",
         options: ["3", "5", "1", "0"],
         correct: 1,
+        explanation: "a>b? → 3>5 = שקר → מחזיר b = 5.",
+      },
+      {
+        q: "מה הפלט: if(5 > 3) if(2 > 4) printf(\"A\"); else printf(\"B\");",
+        options: ["A", "B", "AB", "אין פלט"],
+        correct: 1,
+        explanation: "הelse שייך ל-if הפנימי (dangling else). 5>3 נכון, 2>4 שקר → else → B.",
+      },
+      {
+        q: "מה הפלט: printf(\"%d\", (3 != 3) || (5 == 5));",
+        options: ["0", "1", "2", "שגיאה"],
+        correct: 1,
+        explanation: "(3!=3)=0, (5==5)=1. 0||1=1. OR מחזיר 1 אם לפחות אחד אמת.",
+      },
+      {
+        q: "מה הפלט: int x=15; printf(\"%s\", (x%2==0)?\"זוגי\":\"אי-זוגי\");",
+        options: ["זוגי", "אי-זוגי", "15", "שגיאה"],
+        correct: 1,
+        explanation: "15%2=1≠0, לכן התנאי שקר ומוחזר \"אי-זוגי\".",
+      },
+      {
+        q: "מה short-circuit evaluation ב-&&?",
+        options: [
+          "C מחשב תמיד שני הצדדים",
+          "אם הצד שמאל שקר, הצד ימין לא נבדק",
+          "אם הצד ימין שקר, הצד שמאל לא נבדק",
+          "שני הצדדים נבדקים תמיד",
+        ],
+        correct: 1,
+        explanation: "ב-A&&B: אם A שקר, התוצאה תמיד שקר ו-B לא נבדק. חשוב ל-if(ptr!=NULL && ptr->val).",
+      },
+      {
+        q: "מה הפלט: int x=0; switch(x) { case 0: printf(\"A\"); case 1: printf(\"B\"); break; default: printf(\"C\"); }",
+        options: ["A", "AB", "B", "AC"],
+        correct: 1,
+        explanation: "case 0 מדפיס A, אין break → fall-through ל-case 1 שמדפיס B, ואז break.",
+      },
+      {
+        q: "מה יבדוק if(grade >= 60 && grade <= 100)?",
+        options: [
+          "ציון שווה ל-60 בדיוק",
+          "ציון בתחום 60 עד 100 כולל",
+          "ציון מעל 60 ומעל 100",
+          "שגיאה לוגית",
+        ],
+        correct: 1,
+        explanation: "&& מחייב את שני התנאים. ציון בין 60 ל-100 (כולל הקצוות).",
+      },
+      {
+        q: "מה הפלט: int a=2; if(a>1) printf(\"X\"); if(a>3) printf(\"Y\"); else printf(\"Z\");",
+        options: ["X", "XZ", "XY", "Z"],
+        correct: 1,
+        explanation: "if הראשון (a>1=true) → X. if שני (a>3=false) → else → Z. שתי הדפסות: XZ.",
+      },
+      {
+        q: "מהי טבלת אמת של !true && false?",
+        options: ["true", "false", "undefined", "שגיאה"],
+        correct: 1,
+        explanation: "!true = false, false&&false = false.",
+      },
+      {
+        q: "מה הפלט: int x=100; printf(\"%d\", x>50 && x<200 ? 1 : 0);",
+        options: ["0", "1", "100", "שגיאה"],
+        correct: 1,
+        explanation: "100>50=true, 100<200=true, true&&true=true → מחזיר 1.",
+      },
+      {
+        q: "מה ההבדל בין if-else if לבין if-if?",
+        options: [
+          "אין הבדל",
+          "if-else if: רק ענף אחד מבוצע. if-if: כל תנאי נבדק בנפרד",
+          "if-else if מהיר יותר",
+          "if-if אסור ב-C",
+        ],
+        correct: 1,
+        explanation: "ב-else if: ברגע שתנאי מתקיים, השאר לא נבדקים. ב-if-if עצמאיים: כל תנאי נבדק.",
       },
     ],
   },
@@ -1286,6 +1754,7 @@ int main() {
           "שגיאת זיכרון",
         ],
         correct: 2,
+        explanation: "שגיאה לוגית: הקוד מתקמפל ורץ, אך התוצאה שגויה. הכי קשה לאיתור.",
       },
       {
         q: "מה off-by-one error?",
@@ -1296,11 +1765,13 @@ int main() {
           "גלישת מחסנית",
         ],
         correct: 1,
+        explanation: "off-by-one: שגיאת לולאה שגורמת לביצוע פעם אחת יותר (<=במקום <) או פחות.",
       },
       {
         q: "מה הפלט של: int x=a+b/2 כש-a=4, b=8?",
         options: ["6", "8", "4", "2"],
         correct: 1,
+        explanation: "עדיפויות: b/2=4 קודם, ואז a+4=8. כדי לקבל ממוצע נכון: (a+b)/2=6.",
       },
       {
         q: "למה חשוב לבדוק ערכים גבוליים?",
@@ -1311,6 +1782,113 @@ int main() {
           "אין סיבה מיוחדת",
         ],
         correct: 1,
+        explanation: "שגיאות מתרחשות לרוב בקצוות: ערך 0, מינימום, מקסימום, או ערכים סמוכים לגבולות.",
+      },
+      {
+        q: "מה סוג השגיאה ב: for(i=0; i<=n; i++) כשצריך לעבור n פעמים?",
+        options: [
+          "שגיאת תחביר",
+          "שגיאת זמן ריצה",
+          "שגיאה לוגית (off-by-one)",
+          "אין שגיאה",
+        ],
+        correct: 2,
+        explanation: "הלולאה רצה n+1 פעמים במקום n (0 עד n כולל). זוהי שגיאה לוגית אופיינית.",
+      },
+      {
+        q: "מה safeSquareRoot(-4) תחזיר לפי הקוד בדוגמה?",
+        options: ["0", "-1", "4", "שגיאת קומפילציה"],
+        correct: 1,
+        explanation: "בדיקת if(x<0) מחזירה -1 כערך שגיאה מוסכם.",
+      },
+      {
+        q: "מה ההבדל בין שגיאת syntax לשגיאת runtime?",
+        options: [
+          "אין הבדל – שתיהן מונעות הרצה",
+          "syntax מגולה בקומפילציה, runtime – בזמן ריצה",
+          "runtime מגולה בקומפילציה",
+          "syntax קשה יותר לתיקון",
+        ],
+        correct: 1,
+        explanation: "syntax error: המהדר מסרב לקמפל. runtime error: הקוד קומפל אך קורס בהרצה.",
+      },
+      {
+        q: "מה הפלט של: wrongAverage(4, 8) כשהפונקציה מחשבת a + b/2?",
+        options: ["6", "8", "4", "12"],
+        correct: 1,
+        explanation: "a + b/2 = 4 + 8/2 = 4 + 4 = 8. שגיאה לוגית! הנכון: (a+b)/2 = 6.",
+      },
+      {
+        q: "מה precondition?",
+        options: [
+          "תנאי שחייב להתקיים לפני קריאת הפונקציה",
+          "תנאי שמובטח לאחר הריצה",
+          "תנאי בלולאה",
+          "בדיקת ערכי החזרה",
+        ],
+        correct: 0,
+        explanation: "precondition (תנאי קדם) = הנחה על הקלט. הפונקציה לא אחראית לקלט לא חוקי.",
+      },
+      {
+        q: "מה postcondition?",
+        options: [
+          "תנאי לאחר הפונקציה",
+          "מה מובטח שיתקיים בפלט אחרי ריצה תקינה",
+          "בדיקת overflow",
+          "ניהול זיכרון",
+        ],
+        correct: 1,
+        explanation: "postcondition = מה מובטח שיהיה נכון לאחר הריצה. מתאר מה הפונקציה מחזירה.",
+      },
+      {
+        q: "מה segmentation fault?",
+        options: [
+          "שגיאת תחביר",
+          "שגיאת לוגיקה",
+          "גישה לזיכרון לא חוקי בזמן ריצה",
+          "חריגה ממגבלת זמן",
+        ],
+        correct: 2,
+        explanation: "segfault = גישה לכתובת זיכרון שאינה שייכת לתכנית. למשל: גישה ל-NULL pointer.",
+      },
+      {
+        q: "מה בדיקת 'ערך גבולי' עבור מערך בגודל 5?",
+        options: [
+          "בדיקת arr[2] (אמצע)",
+          "בדיקת arr[0] ו-arr[4] (ראשון ואחרון)",
+          "בדיקת ערך שלילי",
+          "בדיקת 0",
+        ],
+        correct: 1,
+        explanation: "ערכי גבול במערך = האינדקסים הקיצוניים: 0 (ראשון) ו-n-1 (אחרון).",
+      },
+      {
+        q: "מה חלוקה באפס גורמת ב-C?",
+        options: [
+          "מחזירה 0",
+          "מחזירה infinity",
+          "undefined behavior / קריסה",
+          "שגיאת קומפילציה",
+        ],
+        correct: 2,
+        explanation: "חלוקת int באפס היא undefined behavior – בפועל גורמת לקריסה (SIGFPE).",
+      },
+      {
+        q: "מה שגיאת 'integer overflow'?",
+        options: [
+          "חלוקה באפס",
+          "תוצאת חישוב חורגת ממגבלת הטיפוס",
+          "גלישת מחסנית",
+          "קובץ גדול מדי",
+        ],
+        correct: 1,
+        explanation: "int מחזיק עד ~2 מיליארד. חישוב שתוצאתו גדולה יותר יגלוש וייתן ערך שגוי.",
+      },
+      {
+        q: "מה מספר מינימלי של קלטי בדיקה לפונקציה שמחשבת abs(x)?",
+        options: ["1", "2", "3", "5"],
+        correct: 2,
+        explanation: "לפחות 3: מספר חיובי (x>0), אפס (x=0), מספר שלילי (x<0). בדיקת כל המקרים.",
       },
     ],
   },
@@ -1585,6 +2163,7 @@ int main() {
         q: "כמה פעמים רץ: for(i=0; i<5; i++)?",
         options: ["4", "5", "6", "אינסוף"],
         correct: 1,
+        explanation: "i=0,1,2,3,4 → 5 פעמים. תנאי i<5 נכון עד i=4 (כולל).",
       },
       {
         q: "מה ההבדל בין while ל-do-while?",
@@ -1595,16 +2174,19 @@ int main() {
           "אין הבדל",
         ],
         correct: 1,
+        explanation: "do-while בודק התנאי אחרי הביצוע, לכן גוף הלולאה מבוצע לפחות פעם אחת.",
       },
       {
         q: "מה הערך הנכון לאתחל בו מכפיל?",
         options: ["0", "1", "-1", "N"],
         correct: 1,
+        explanation: "product = 1 מכיוון ש-1 הוא היסוד הנייטרלי לכפל. 0 יגרום לכפל 0 עם כל דבר.",
       },
       {
         q: "מה הפלט של: for(i=10; i>0; i-=3) printf(\"%d \",i);",
         options: ["10 7 4 1", "10 7 4", "10 7 4 1 -2", "10 7 4 2"],
         correct: 0,
+        explanation: "i=10,7,4,1 → כולם >0. i=1-3=-2 → תנאי -2>0 שקר → יציאה. פלט: 10 7 4 1",
       },
       {
         q: "מה אלגוריתם הזקיף?",
@@ -1615,6 +2197,7 @@ int main() {
           "בדיקת שגיאות",
         ],
         correct: 1,
+        explanation: "sentinel = ערך מוסכם מיוחד שמסמן סיום קלט, כגון -1 לרשימת ציונים.",
       },
       {
         q: "לולאת for(;;) ב-C היא:",
@@ -1625,6 +2208,76 @@ int main() {
           "לולאה שרצה פעם אחת",
         ],
         correct: 1,
+        explanation: "for(;;) = for ללא init, condition ו-update. תנאי ריק נחשב true → לולאה אינסופית.",
+      },
+      {
+        q: "מה הפלט: int sum=0; for(int i=1; i<=4; i++) sum+=i; printf(\"%d\", sum);",
+        options: ["4", "10", "6", "8"],
+        correct: 1,
+        explanation: "sum = 1+2+3+4 = 10.",
+      },
+      {
+        q: "מה הפלט: int i=0; while(i<3) { printf(\"%d \", i); i+=2; }",
+        options: ["0 1 2", "0 2", "0 2 4", "1 3"],
+        correct: 1,
+        explanation: "i=0 (הדפס, i+=2→2), i=2 (הדפס, i+=2→4), i=4 (4<3=false → יציאה). פלט: 0 2",
+      },
+      {
+        q: "כמה פעמים תרוץ לולאה מקוננת: for(i=1;i<=3;i++) for(j=1;j<=4;j++)?",
+        options: ["7", "12", "9", "16"],
+        correct: 1,
+        explanation: "3×4=12 פעמים. כל איטרציה חיצונית מריצה 4 איטרציות פנימיות.",
+      },
+      {
+        q: "מה הפלט: int n=5; do { printf(\"%d \",n); n--; } while(n>5);",
+        options: ["5", "אין פלט", "5 4 3", "לולאה אינסופית"],
+        correct: 0,
+        explanation: "do-while מבצע פעם אחת (n=5→הדפס 5, n=4), ואז בודק 4>5=false → יוצא. פלט: 5",
+      },
+      {
+        q: "מה ייצוג break בלולאה?",
+        options: [
+          "ממשיך לאיטרציה הבאה",
+          "יוצא מהלולאה הנוכחית מיד",
+          "עוצר את כל התכנית",
+          "חוזר להתחלת הלולאה",
+        ],
+        correct: 1,
+        explanation: "break יוצא מהלולאה הפנימית ביותר מיד. continue מדלג לאיטרציה הבאה.",
+      },
+      {
+        q: "מה continue עושה בלולאה?",
+        options: [
+          "יוצא מהלולאה",
+          "מדלג לאיטרציה הבאה",
+          "מאתחל מחדש את הלולאה",
+          "שקול ל-break",
+        ],
+        correct: 1,
+        explanation: "continue מדלג על שאר גוף האיטרציה הנוכחית וממשיך לאיטרציה הבאה.",
+      },
+      {
+        q: "מה הפלט: for(int i=0;i<5;i++) { if(i==3) break; printf(\"%d \",i); }",
+        options: ["0 1 2 3 4", "0 1 2", "0 1 2 3", "3 4"],
+        correct: 1,
+        explanation: "i=0,1,2 מודפסים. כשi=3, break יוצא מהלולאה. פלט: 0 1 2",
+      },
+      {
+        q: "מה מונה (counter) בתכנות?",
+        options: [
+          "משתנה שמצביע על כתובת",
+          "משתנה שסופר כמה פעמים אירוע התרחש",
+          "לולאה שסופרת אחורה",
+          "משתנה גלובלי",
+        ],
+        correct: 1,
+        explanation: "counter = משתנה שמאותחל ל-0 ומוגדל בכל פעם שאירוע מסוים קורה.",
+      },
+      {
+        q: "מה הפלט: int p=1; for(int i=1;i<=4;i++) p*=i; printf(\"%d\",p);",
+        options: ["10", "24", "4", "1"],
+        correct: 1,
+        explanation: "p = 1×1×2×3×4 = 24 (4! = פקטוריאל 4).",
       },
     ],
   },
@@ -1857,26 +2510,91 @@ int main() {
         q: "מה מחזירה פונקציה void?",
         options: ["0", "NULL", "לא מחזירה כלום", "1"],
         correct: 2,
+        explanation: "void פירושו 'לא מחזיר ערך'. ניתן לכתוב return; ריק, או לא לכתוב return כלל.",
       },
       {
         q: "מה pass-by-value?",
-        options: [
-          "העברת כתובת המשתנה",
-          "העברת עותק של הערך",
-          "שינוי המשתנה המקורי",
-          "החזרת מספר ערכים",
-        ],
+        options: ["העברת כתובת המשתנה", "העברת עותק של הערך", "שינוי המשתנה המקורי", "החזרת מספר ערכים"],
         correct: 1,
+        explanation: "pass-by-value: הפונקציה מקבלת עותק. שינויים בפונקציה לא משפיעים על המשתנה המקורי.",
       },
       {
         q: "מה אבטיפוס (prototype)?",
-        options: [
-          "הגדרת פונקציה",
-          "הצהרה על פונקציה לפני שימוש בה",
-          "סוג החזרה בלבד",
-          "פונקציה ריקה",
-        ],
+        options: ["הגדרת פונקציה", "הצהרה על פונקציה לפני שימוש בה", "סוג החזרה בלבד", "פונקציה ריקה"],
         correct: 1,
+        explanation: "prototype = הצהרה על הfooter של הפונקציה (שם, טיפוסים, ערך החזרה) לפני ההגדרה.",
+      },
+      {
+        q: "מה הפלט: int add(int a,int b){return a+b;} printf(\"%d\",add(3,4));",
+        options: ["3", "4", "7", "שגיאה"],
+        correct: 2,
+        explanation: "add(3,4) = 3+4 = 7.",
+      },
+      {
+        q: "מה הפלט: void f(int x){x=100;} int main(){int a=5; f(a); printf(\"%d\",a);}",
+        options: ["100", "5", "0", "שגיאה"],
+        correct: 1,
+        explanation: "pass by value: x הוא עותק. שינוי x לא משפיע על a. פלט: 5.",
+      },
+      {
+        q: "מה scope גלובלי?",
+        options: ["משתנה שנגיש רק בפונקציה", "משתנה מחוץ לכל פונקציה הנגיש מכולן", "פרמטר פונקציה", "משתנה מקומי"],
+        correct: 1,
+        explanation: "גלובלי = מוגדר מחוץ לכל פונקציה, נגיש מכל פונקציה בקובץ.",
+      },
+      {
+        q: "מה isPrime(7) מחזיר?",
+        options: ["0", "1", "7", "שגיאה"],
+        correct: 1,
+        explanation: "7 ראשוני. אין מחלק בין 2 ל-sqrt(7)≈2.6. מחזיר 1 (כן).",
+      },
+      {
+        q: "מה ה-Stack בהקשר פונקציות?",
+        options: ["מבנה נתונים למיון", "אזור זיכרון שמנהל קריאות פונקציה – LIFO", "ספריית פונקציות", "סוג לולאה"],
+        correct: 1,
+        explanation: "Stack (מחסנית) LIFO: קריאת פונקציה מוסיפה frame; חזרה ממנה מסירה אותו.",
+      },
+      {
+        q: "מה הפלט: int max(int a,int b){return a>b?a:b;} printf(\"%d\",max(7,3));",
+        options: ["3", "7", "1", "0"],
+        correct: 1,
+        explanation: "7>3=true → מחזיר a=7.",
+      },
+      {
+        q: "כמה ערכים יכולה פונקציה להחזיר בreturn?",
+        options: ["כמה שרוצים", "0 בלבד", "1 בלבד (או void)", "2"],
+        correct: 2,
+        explanation: "return מחזיר ערך אחד בלבד. כדי להחזיר מספר ערכים: מצביעים או struct.",
+      },
+      {
+        q: "מה sumDigits(123) מחזיר?",
+        options: ["3", "6", "123", "0"],
+        correct: 1,
+        explanation: "1+2+3=6. הפונקציה מחלקת: 123%10=3, 12%10=2, 1%10=1. סה\"כ=6.",
+      },
+      {
+        q: "מה קורה לmשתנה מקומי אחרי שהפונקציה מסתיימת?",
+        options: ["נשמר בזיכרון", "נמחק עם stack frame", "הופך לגלובלי", "מוחזר אוטומטית"],
+        correct: 1,
+        explanation: "משתנה מקומי חי על ה-stack. כשהפונקציה חוזרת, ה-frame נמחק ואיתו כל המשתנים המקומיים.",
+      },
+      {
+        q: "מה הפלט: int f(int n){if(n==0)return 1; return n*f(n-1);} printf(\"%d\",f(4));",
+        options: ["4", "24", "12", "8"],
+        correct: 1,
+        explanation: "f(4)=4*f(3)=4*3*f(2)=4*3*2*f(1)=4*3*2*1*f(0)=4*3*2*1*1=24 (פקטוריאל).",
+      },
+      {
+        q: "מה recursion (רקורסיה)?",
+        options: ["לולאה", "פונקציה שקוראת לעצמה", "פונקציה ללא פרמטרים", "macro"],
+        correct: 1,
+        explanation: "רקורסיה = פונקציה שקוראת לעצמה. חייבת תנאי בסיס שמפסיק את הקריאות.",
+      },
+      {
+        q: "מה printLine('*', 5) תדפיס לפי קוד הדוגמה?",
+        options: ["5", "*****", "* * * * *", "5*"],
+        correct: 1,
+        explanation: "הפונקציה מדפיסה ch פעמים len: '*' * 5 = *****.",
       },
     ],
   },
@@ -2072,16 +2790,101 @@ int main() {
         q: "מה האינדקס האחרון במערך int arr[8]?",
         options: ["8", "7", "9", "0"],
         correct: 1,
+        explanation: "מערך בגודל 8: אינדקסים 0 עד 7. arr[8] הוא מחוץ לגבולות!",
       },
       {
         q: "כשמעבירים מערך לפונקציה, שינויים בפונקציה:",
+        options: ["לא משפיעים על המקורי", "משפיעים על המקורי", "תלוי בטיפוס", "שגיאת קומפילציה"],
+        correct: 1,
+        explanation: "מערך מועבר כמצביע לאלמנט הראשון. שינויים בפונקציה משנים את המערך המקורי.",
+      },
+      {
+        q: "מה הפלט: int arr[]={10,20,30}; printf(\"%d\",arr[1]);",
+        options: ["10", "20", "30", "0"],
+        correct: 1,
+        explanation: "arr[1] = אלמנט שני = 20. אינדקסים מתחילים ב-0.",
+      },
+      {
+        q: "מה findMax({85,92,78,96,88}, 5) מחזיר?",
+        options: ["85", "92", "96", "88"],
+        correct: 2,
+        explanation: "המקסימום במערך {85,92,78,96,88} הוא 96.",
+      },
+      {
+        q: "מה קורה ב: int arr[5]; arr[5]=10;?",
+        options: ["עובד תמיד", "שגיאת קומפילציה", "undefined behavior / גלישת גבולות", "מרחיב את המערך"],
+        correct: 2,
+        explanation: "arr[5] הוא מחוץ לגבולות (גודל 5 → אינדקסים 0-4). גלישת גבולות = undefined behavior.",
+      },
+      {
+        q: "מה ההבדל בין int arr[5] ל-int arr[]={1,2,3}?",
         options: [
-          "לא משפיעים על המקורי",
-          "משפיעים על המקורי",
-          "תלוי בטיפוס",
-          "שגיאת קומפילציה",
+          "אין הבדל",
+          "הראשון: גודל 5, לא מאותחל. השני: גודל 3, מאותחל",
+          "השני חסר גודל ולא יתקמפל",
+          "הראשון מהיר יותר",
         ],
         correct: 1,
+        explanation: "arr[5]: מקצה 5 int לא מאותחלים. arr[]={1,2,3}: המהדר מחשב גודל=3 אוטומטית.",
+      },
+      {
+        q: "מה הפלט: int a[]={2,4,6,8}; int s=0; for(int i=0;i<4;i++) s+=a[i]; printf(\"%d\",s);",
+        options: ["10", "20", "8", "24"],
+        correct: 1,
+        explanation: "2+4+6+8=20.",
+      },
+      {
+        q: "כמה בתים תופס: int arr[10]?",
+        options: ["10", "20", "40", "80"],
+        correct: 2,
+        explanation: "sizeof(int)=4, 10 אלמנטים: 4×10=40 בתים.",
+      },
+      {
+        q: "מה reverseArray({1,2,3,4,5}, 5) תייצר?",
+        options: ["{5,4,3,2,1}", "{1,2,3,4,5}", "{5,1,2,3,4}", "{4,3,2,1,5}"],
+        correct: 0,
+        explanation: "הפיכת מערך מחליפה arr[0]↔arr[4], arr[1]↔arr[3]: {5,4,3,2,1}.",
+      },
+      {
+        q: "מה sizeof(arr)/sizeof(arr[0]) מחשב?",
+        options: ["גודל הבית הראשון", "מספר האלמנטים במערך", "גודל המערך בבתים", "כתובת המערך"],
+        correct: 1,
+        explanation: "גודל כולל / גודל אלמנט = מספר אלמנטים. דרך נפוצה לחשב גודל מערך.",
+      },
+      {
+        q: "מה הפלט: char name[]=\"Hi\"; printf(\"%d\",strlen(name));",
+        options: ["2", "3", "1", "0"],
+        correct: 0,
+        explanation: "strlen סופר תווים עד \\0 (לא כולל). \"Hi\" = 'H','i','\\0' → אורך 2.",
+      },
+      {
+        q: "מהי שגיאה קלאסית עם מחרוזות ב-C?",
+        options: [
+          "שימוש ב-strlen",
+          "חציית \\0 בקריאה/כתיבה",
+          "הגדרת מערך char",
+          "שימוש ב-printf %s",
+        ],
+        correct: 1,
+        explanation: "buffer overflow = כתיבה מעבר לגודל המערך. למשל: strcpy(arr, מחרוזת ארוכה מ-arr).",
+      },
+      {
+        q: "מה הפלט: int a[]={5,3,8,1}; printf(\"%d\",a[0]+a[3]);",
+        options: ["6", "13", "8", "5"],
+        correct: 0,
+        explanation: "a[0]=5, a[3]=1. 5+1=6.",
+      },
+      {
+        q: "מה countAbove({80,90,70,95,85},5,80) מחזיר?",
+        options: ["2", "3", "4", "5"],
+        correct: 1,
+        explanation: "מעל 80 (לא כולל): 90,95,85 → 3 אלמנטים.",
+      },
+      {
+        q: "מה הפלט: int a[3]={0}; printf(\"%d %d %d\",a[0],a[1],a[2]);",
+        options: ["0 0 0", "? ? ?", "1 2 3", "שגיאה"],
+        correct: 0,
+        explanation: "int a[3]={0} מאתחל כל האלמנטים ל-0. פלט: 0 0 0.",
       },
     ],
   },
@@ -2273,6 +3076,10 @@ int main() {
       "כתוב פונקציה שמחשבת את סכום כל עמודה במטריצה.",
       "כתוב פונקציה שבודקת אם מטריצה ריבועית היא סימטרית.",
       "ממש כפל שתי מטריצות (n×m) × (m×k).",
+      "כתוב פונקציה שמוצאת את האלמנט הגדול ביותר בכל שורה.",
+      "כתוב פונקציה שמחשבת את סכום האלכסון הראשי והמשני.",
+      "ממש חיפוש בינארי עם ספירת שלבים ומדפיס כל השוואה.",
+      "כתוב פונקציה שמסובבת מטריצה 90 מעלות ימינה.",
     ],
     challenge:
       "ממש שחמט: צור מטריצה 8×8, הצב קצת כלים, כתוב פונקציה שבודקת מהלכים חוקיים לרץ.",
@@ -2281,11 +3088,106 @@ int main() {
         q: "מה הסיבוכיות של חיפוש בינארי?",
         options: ["O(n)", "O(n²)", "O(log n)", "O(1)"],
         correct: 2,
+        explanation: "בכל שלב חוצים את מרחב החיפוש לחצי. מספר שלבים: log₂(n).",
       },
       {
         q: "מה דרוש לחיפוש בינארי?",
         options: ["מערך ממוין", "מערך עם מספרים ייחודיים", "מערך גדול", "אין דרישה"],
         correct: 0,
+        explanation: "חיפוש בינארי דורש מערך ממוין. ללא מיון התוצאה אינה מהימנה.",
+      },
+      {
+        q: "מה הפלט: int m[2][3]={{1,2,3},{4,5,6}}; printf(\"%d\",m[1][2]);",
+        options: ["3", "5", "6", "2"],
+        correct: 2,
+        explanation: "m[1][2] = שורה 1 (שנייה), עמודה 2 (שלישית) = 6.",
+      },
+      {
+        q: "כמה אלמנטים יש במטריצה int mat[4][5]?",
+        options: ["9", "20", "45", "25"],
+        correct: 1,
+        explanation: "4 שורות × 5 עמודות = 20 אלמנטים.",
+      },
+      {
+        q: "מה האלכסון הראשי של מטריצה ריבועית?",
+        options: ["שורה ראשונה", "עמודה אחרונה", "האלמנטים שבהם i==j", "שורה אחרונה"],
+        correct: 2,
+        explanation: "אלכסון ראשי = כל mat[i][i]: mat[0][0], mat[1][1], mat[2][2]...",
+      },
+      {
+        q: "מה הסיבוכיות של חיפוש סדרתי (linear)?",
+        options: ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+        correct: 2,
+        explanation: "חיפוש סדרתי עובר על כל האלמנטים אחד אחד: O(n).",
+      },
+      {
+        q: "חיפוש בינארי במערך של 1024 אלמנטים דורש לכל היותר כמה השוואות?",
+        options: ["10", "512", "1024", "100"],
+        correct: 0,
+        explanation: "log₂(1024) = 10. בכל שלב מחצים: 1024→512→256→...→1.",
+      },
+      {
+        q: "מה linearSearch({5,3,8,1,9}, 5, 8) מחזיר?",
+        options: ["8", "2", "3", "-1"],
+        correct: 1,
+        explanation: "8 נמצא באינדקס 2 (arr[0]=5, arr[1]=3, arr[2]=8). מחזיר 2.",
+      },
+      {
+        q: "מה מחזיר binarySearch אם הערך לא נמצא?",
+        options: ["0", "NULL", "-1", "n"],
+        correct: 2,
+        explanation: "מוסכם להחזיר -1 כערך שגיאה/לא נמצא (כי -1 אינו אינדקס חוקי).",
+      },
+      {
+        q: "מה הפלט: int mat[3][3]={{1,2,3},{4,5,6},{7,8,9}}; int s=0; for(int i=0;i<3;i++) s+=mat[i][i]; printf(\"%d\",s);",
+        options: ["9", "15", "12", "45"],
+        correct: 1,
+        explanation: "אלכסון ראשי: mat[0][0]+mat[1][1]+mat[2][2] = 1+5+9 = 15.",
+      },
+      {
+        q: "מה הבדל בין מטריצה סימטרית לא-סימטרית?",
+        options: [
+          "מטריצה ריבועית לעומת מלבנית",
+          "mat[i][j]==mat[j][i] לכל i,j",
+          "כל הערכים זהים",
+          "האלכסון 0",
+        ],
+        correct: 1,
+        explanation: "מטריצה סימטרית: mat[i][j] == mat[j][i] לכל i,j. כלומר שווה לצירה.",
+      },
+      {
+        q: "כמה שורות ועמודות יש ב-int mat[ROWS][COLS] כשROWS=3, COLS=4?",
+        options: ["4 שורות, 3 עמודות", "3 שורות, 4 עמודות", "7 שורות", "12 שורות"],
+        correct: 1,
+        explanation: "int mat[ROWS][COLS]: ROWS=3 שורות, COLS=4 עמודות.",
+      },
+      {
+        q: "מהו יתרון חיפוש בינארי על סדרתי?",
+        options: [
+          "עובד על כל סוגי הנתונים",
+          "מהיר בהרבה: O(log n) לעומת O(n)",
+          "לא דורש מיון",
+          "פשוט יותר לתכנות",
+        ],
+        correct: 1,
+        explanation: "O(log n) << O(n) לn גדול. למשל n=1,000,000: בינארי≤20 שלבים, סדרתי≤1,000,000.",
+      },
+      {
+        q: "מה הפלט: int mat[2][2]={{1,2},{3,4}}; printf(\"%d\",mat[0][1]+mat[1][0]);",
+        options: ["3", "5", "7", "6"],
+        correct: 1,
+        explanation: "mat[0][1]=2, mat[1][0]=3. 2+3=5.",
+      },
+      {
+        q: "כיצד מגדירים פונקציה שמקבלת מטריצה int mat[ROWS][COLS]?",
+        options: [
+          "void f(int mat[][])",
+          "void f(int mat[][COLS], int rows)",
+          "void f(int **mat)",
+          "void f(int mat[ROWS][COLS])",
+        ],
+        correct: 1,
+        explanation: "בהעברת מטריצה לפונקציה, מספר העמודות חייב להיות מוגדר. השורות ניתן להשמיט.",
       },
     ],
   },
@@ -2451,6 +3353,11 @@ int main() {
     exercises: [
       "כתוב פונקציה שמקבלת מחרוזת ומחזירה מצביע לתו הראשון שאינו רווח.",
       "כתוב פונקציה בטוחה לחיפוש בינארי שמחזירה NULL אם לא נמצא.",
+      "כתוב פונקציה swap(int *a, int *b) ובדוק אותה.",
+      "ממש מיון בועות עם מצביעים (ללא אינדקסים).",
+      "כתוב פונקציה minMax(int *arr, int n, int *minVal, int *maxVal) שמחזירה שניים דרך מצביעים.",
+      "כתוב פונקציה שמחזירה מצביע לאלמנט המקסימלי במערך.",
+      "ממש פונקציה שהופכת מחרוזת in-place דרך מצביעים.",
     ],
     challenge:
       "ממש qsort בעצמך עם פונקציית השוואה כמצביע לפונקציה.",
@@ -2459,6 +3366,126 @@ int main() {
         q: "אם int *p = &x, מה *p?",
         options: ["כתובת x", "ערך x", "כתובת p", "NULL"],
         correct: 1,
+        explanation: "*p = dereference = הערך שנמצא בכתובת שp מצביע עליה = ערך x.",
+      },
+      {
+        q: "מה & עושה ב-C?",
+        options: [
+          "AND ביטי",
+          "מחזיר כתובת המשתנה בזיכרון",
+          "מגדיר מצביע",
+          "ניתור (dereference)",
+        ],
+        correct: 1,
+        explanation: "&x = כתובת המשתנה x בזיכרון. בהקשר מצביעים: int *p = &x.",
+      },
+      {
+        q: "מה הפלט: int x=5; int *p=&x; *p=10; printf(\"%d\",x);",
+        options: ["5", "10", "0", "כתובת"],
+        correct: 1,
+        explanation: "*p=10 שינה את הערך שp מצביע עליו, כלומר שינה את x. פלט: 10.",
+      },
+      {
+        q: "מה NULL pointer?",
+        options: [
+          "מצביע שמצביע על 0",
+          "מצביע לא מאותחל",
+          "ערך מיוחד שמסמן שהמצביע לא מצביע על כלום",
+          "מצביע פנוי לשימוש",
+        ],
+        correct: 2,
+        explanation: "NULL = (void*)0. מסמן שהמצביע לא מצביע על כתובת חוקית. בטוח כביקורת.",
+      },
+      {
+        q: "מה הפלט: int a[]={1,2,3}; int *p=a; printf(\"%d\",*(p+1));",
+        options: ["1", "2", "3", "כתובת"],
+        correct: 1,
+        explanation: "p מצביע על a[0]. p+1 מצביע על a[1]=2. *(p+1)=2.",
+      },
+      {
+        q: "מה void swap(int *a, int *b) עושה ב-swap(&x,&y)?",
+        options: [
+          "מחליפה עותקים",
+          "מחליפה ערכי x ו-y דרך המצביעים",
+          "לא מחליפה כלום",
+          "שגיאת קומפילציה",
+        ],
+        correct: 1,
+        explanation: "העברת &x,&y מאפשרת לפונקציה לשנות את x ו-y ישירות דרך ניתור.",
+      },
+      {
+        q: "מה arr[i] שקול ל?",
+        options: ["&arr+i", "*(arr+i)", "*arr[i]", "arr+(i*4)"],
+        correct: 1,
+        explanation: "arr[i] ≡ *(arr+i). שני הביטויים גוישים לאותה כתובת.",
+      },
+      {
+        q: "מה גדול יותר: sizeof(int*) או sizeof(int)?",
+        options: [
+          "sizeof(int) תמיד גדול",
+          "שווים תמיד",
+          "sizeof(int*) תלוי בארכיטקטורה (4 או 8)",
+          "sizeof(int*) תמיד 2",
+        ],
+        correct: 2,
+        explanation: "מצביע: 4 בתים ב-32-bit, 8 בתים ב-64-bit. sizeof(int)=4 תמיד.",
+      },
+      {
+        q: "מה הפלט: int x=3, y=7; swap(&x,&y); printf(\"%d %d\",x,y);",
+        options: ["3 7", "7 3", "0 0", "שגיאה"],
+        correct: 1,
+        explanation: "swap מחליפה את הערכים דרך מצביעים. x=7, y=3. פלט: 7 3.",
+      },
+      {
+        q: "מה *NULL גורם?",
+        options: [
+          "מחזיר 0",
+          "segmentation fault / undefined behavior",
+          "מחזיר NULL",
+          "שגיאת קומפילציה",
+        ],
+        correct: 1,
+        explanation: "ניתור NULL = גישה לכתובת 0 → segfault. תמיד לבדוק ptr!=NULL לפני ניתור.",
+      },
+      {
+        q: "מה 'pointer arithmetic'?",
+        options: [
+          "חיבור שני מצביעים",
+          "חיבור/חיסור int למצביע, קפיצה לאלמנט הבא/הקודם",
+          "כפל מצביע במספר",
+          "השוואת ערכים",
+        ],
+        correct: 1,
+        explanation: "p+1 מקדם את המצביע ב-sizeof(*p) בתים. עבור int*: p+1 = p+4 כתובות.",
+      },
+      {
+        q: "מה הפלט: int *p=NULL; if(p) printf(\"A\"); else printf(\"B\");",
+        options: ["A", "B", "שגיאה", "אין פלט"],
+        correct: 1,
+        explanation: "NULL = 0 = שקר. if(NULL) → else → B.",
+      },
+      {
+        q: "מה הפלט: int a=5; int *p=&a; (*p)++; printf(\"%d\",a);",
+        options: ["5", "6", "כתובת", "שגיאה"],
+        correct: 1,
+        explanation: "(*p)++ = קידום ערך a דרך המצביע. a מקבל 5+1=6.",
+      },
+      {
+        q: "כדי לקבל כתובת של משתנה x, כותבים:",
+        options: ["*x", "&x", "x*", "->x"],
+        correct: 1,
+        explanation: "&x מחזיר את כתובת x בזיכרון. *x הוא ניתור (ל-x שהוא מצביע).",
+      },
+      {
+        q: "מה הסיבה העיקרית להעביר מצביע לפונקציה?",
+        options: [
+          "לחסוך זיכרון",
+          "לאפשר לפונקציה לשנות את המשתנה המקורי",
+          "מהירות ריצה",
+          "לא צריך & בקריאה",
+        ],
+        correct: 1,
+        explanation: "pass by pointer מאפשר לפונקציה לשנות את המשתנה המקורי דרך הניתור.",
       },
     ],
   },
@@ -2621,6 +3648,10 @@ int main() {
       "כתוב פונקציה שממירה מחרוזת לCamelCase.",
       "כתוב פונקציה שסופרת הופעות של תו במחרוזת.",
       "כתוב פונקציה שמחליפה כל הופעה של תת-מחרוזת באחרת.",
+      "כתוב פונקציה שבודקת אם שתי מחרוזות הן אנגרמות זו של זו.",
+      "ממש פונקציה trim(str) שמוחקת רווחים מתחילת וסוף מחרוזת.",
+      "כתוב פונקציה שממירה מחרוזת של מילים לCROSS_CASE.",
+      "ממש פונקציה שמשרשרת מערך מחרוזות עם מפריד בין כל שניים.",
     ],
     challenge:
       "ממש פונקציה שמנתחת ביטוי מתמטי פשוט כמחרוזת ('3+4*2') ומחשבת את התוצאה לפי סדר פעולות.",
@@ -2629,11 +3660,101 @@ int main() {
         q: "מה מחזיר strlen('Hello')?",
         options: ["6", "5", "4", "0"],
         correct: 1,
+        explanation: "strlen סופר תווים עד \\0 (לא כולל). 'Hello' = 5 תווים.",
       },
       {
         q: "מה מחזיר strcmp('abc','abc')?",
         options: ["1", "0", "-1", "true"],
         correct: 1,
+        explanation: "strcmp מחזיר 0 אם המחרוזות זהות.",
+      },
+      {
+        q: "כמה בתים תופסת המחרוזת \"Hello\" בזיכרון?",
+        options: ["5", "6", "4", "10"],
+        correct: 1,
+        explanation: "'H','e','l','l','o','\\0' = 6 בתים. ה-\\0 תופס בית נוסף.",
+      },
+      {
+        q: "מה הפלט: char s[]=\"abc\"; printf(\"%d\",strlen(s));",
+        options: ["4", "3", "2", "0"],
+        correct: 1,
+        explanation: "strlen(\"abc\") = 3. לא סופר את ה-\\0.",
+      },
+      {
+        q: "מה strcat(\"Hello\", \" World\") מחזיר?",
+        options: ["\"Hello\"", "\" World\"", "\"Hello World\"", "שגיאה"],
+        correct: 2,
+        explanation: "strcat שרשרת src אל dst ומחזיר מצביע ל-dst. התוצאה: \"Hello World\".",
+      },
+      {
+        q: "מה הבדל בין strcpy ל-strncpy?",
+        options: [
+          "אין הבדל",
+          "strncpy מעתיקה לכל היותר n תווים – בטוחה יותר",
+          "strcpy בטוחה יותר",
+          "strncpy מוסיפה \\0 תמיד",
+        ],
+        correct: 1,
+        explanation: "strncpy(dst, src, n) מעתיקה עד n תווים. מגנה מ-buffer overflow.",
+      },
+      {
+        q: "מה isdigit('7') מחזיר?",
+        options: ["0", "7", "ערך לא-אפס (אמת)", "'7'"],
+        correct: 2,
+        explanation: "isdigit מחזיר ערך לא-אפס אם התו הוא ספרה (0-9). '7' היא ספרה.",
+      },
+      {
+        q: "מה toupper('a') מחזיר?",
+        options: ["'a'", "'A'", "65", "שגיאה"],
+        correct: 1,
+        explanation: "toupper ממיר אות קטנה לגדולה. 'a' → 'A'.",
+      },
+      {
+        q: "מה isPalindrome(\"racecar\") מחזיר?",
+        options: ["0", "1", "7", "שגיאה"],
+        correct: 1,
+        explanation: "\"racecar\" הפוך = \"racecar\". פלינדרום → מחזיר 1.",
+      },
+      {
+        q: "מה strtok(\"hello world\", \" \") מחזיר בקריאה הראשונה?",
+        options: ["\"hello world\"", "\"hello\"", "\"world\"", "NULL"],
+        correct: 1,
+        explanation: "strtok מפצל לפי המפריד. קריאה ראשונה: מחזיר \"hello\".",
+      },
+      {
+        q: "מה atoi(\"42abc\") מחזיר?",
+        options: ["0", "42", "שגיאה", "\"42abc\""],
+        correct: 1,
+        explanation: "atoi ממיר מחרוזת ל-int עד שתוקע בתו לא-מספרי. \"42abc\" → 42.",
+      },
+      {
+        q: "מה הפלט: char s[10]=\"Hi\"; s[1]='o'; printf(\"%s\",s);",
+        options: ["Hi", "Ho", "H", "oi"],
+        correct: 1,
+        explanation: "s[1]='o' מחליף 'i' ב-'o'. המחרוזת הופכת ל-\"Ho\".",
+      },
+      {
+        q: "מה strchr(\"hello\", 'l') מחזיר?",
+        options: ["NULL", "2", "מצביע לתו 'l' הראשון", "'l'"],
+        correct: 2,
+        explanation: "strchr מחזיר מצביע לתו הראשון שמוצא, או NULL אם לא נמצא.",
+      },
+      {
+        q: "מה strcmp(\"abc\",\"abd\") מחזיר?",
+        options: ["0", "ערך שלילי", "ערך חיובי", "1"],
+        correct: 1,
+        explanation: "\"abc\" < \"abd\" (c < d). strcmp מחזיר ערך שלילי כשהראשונה קטנה.",
+      },
+      {
+        q: "מה הדרך הנכונה להשוות מחרוזות ב-C?",
+        options: [
+          "if(s1 == s2)",
+          "if(strcmp(s1,s2)==0)",
+          "if(*s1 == *s2)",
+          "if(s1 equals s2)",
+        ],
+        correct: 1,
+        explanation: "s1==s2 משווה כתובות, לא תוכן. strcmp(s1,s2)==0 משווה את התוכן.",
       },
     ],
   },
@@ -2800,24 +3921,138 @@ int main() {
       "ממש Insertion Sort על מערך מחרוזות.",
       "כתוב פונקציה שבודקת כמה החלפות דרושות ב-Bubble Sort.",
       "ממש Merge Sort.",
+      "כתוב Selection Sort ובדוק מספר ההשוואות לעומת Bubble Sort.",
+      "ממש חיפוש בינארי רקורסיבי.",
+      "מדוד זמן ריצה של 3 אלגוריתמי מיון על מערך n=1000.",
+      "כתוב מיון שמוין תחילה לפי שדה אחד ואחר כך לפי שדה שני (stable).",
     ],
     challenge:
       "ממש counting sort (O(n+k)) ובדוק ביצועים מול bubble sort על מערך של 10,000 איברים.",
     quiz: [
       {
-        q: "מה הסיבוכיות של חיפוש בינארי?",
-        options: ["O(n)", "O(n²)", "O(log n)", "O(1)"],
+        q: "מה הסיבוכיות של Bubble Sort?",
+        options: ["O(n)", "O(n log n)", "O(n²)", "O(1)"],
         correct: 2,
+        explanation: "Bubble Sort: שתי לולאות מקוננות → O(n²) במקרה הממוצע והגרוע.",
       },
       {
         q: "מה יתרון Insertion Sort?",
+        options: ["תמיד מהיר מ-Quick Sort", "יעיל על מערכים כמעט-ממוינים", "O(n log n) בכל מקרה", "לא דורש זיכרון"],
+        correct: 1,
+        explanation: "Insertion Sort יעיל על מערכים קטנים או כמעט-ממוינים: O(n) במקרה הטוב.",
+      },
+      {
+        q: "מה הסיבוכיות של חיפוש בינארי?",
+        options: ["O(n)", "O(n²)", "O(log n)", "O(1)"],
+        correct: 2,
+        explanation: "בכל שלב מחצים את מרחב החיפוש: O(log n).",
+      },
+      {
+        q: "מה Selection Sort עושה בכל איטרציה?",
         options: [
-          "תמיד מהיר מ-Quick Sort",
-          "יעיל על מערכים כמעט-ממוינים",
-          "O(n log n) בכל מקרה",
-          "לא דורש זיכרון",
+          "מחליף כל זוג סמוך",
+          "מוצא את המינימום ומניח אותו במקומו",
+          "מכניס את האלמנט הנוכחי למקומו הנכון",
+          "מפצל את המערך לחצאים",
         ],
         correct: 1,
+        explanation: "Selection Sort: בכל מעבר מוצא את המינימום בחלק הלא-ממוין ומחליף אותו לתחילה.",
+      },
+      {
+        q: "אלגוריתם מיון עם סיבוכיות O(n log n) מהיר יותר מ-O(n²) כי:",
+        options: [
+          "הוא פשוט יותר",
+          "log n << n לn גדול",
+          "הוא דורש פחות זיכרון",
+          "הוא לא דורש החלפות",
+        ],
+        correct: 1,
+        explanation: "לn=1000: O(n²)=1,000,000 פעולות, O(n log n)≈10,000. הבדל של פי 100.",
+      },
+      {
+        q: "מה stable sort?",
+        options: [
+          "מיון שתמיד מצליח",
+          "מיון ששומר על הסדר היחסי של אלמנטים שווים",
+          "מיון ב-O(n log n) תמיד",
+          "מיון ללא החלפות",
+        ],
+        correct: 1,
+        explanation: "stable = אלמנטים עם ערך זהה נשארים בסדרם המקורי. Insertion Sort הוא stable.",
+      },
+      {
+        q: "כמה פעמים Bubble Sort עובר על מערך n=5?",
+        options: ["5", "4", "25", "10"],
+        correct: 1,
+        explanation: "Bubble Sort מבצע n-1=4 מעברים. בכל מעבר האלמנט הגדול 'צף' למעלה.",
+      },
+      {
+        q: "מה הסיבוכיות של Selection Sort?",
+        options: ["O(n)", "O(n log n)", "O(n²)", "O(log n)"],
+        correct: 2,
+        explanation: "Selection Sort: לכל אחד מn האלמנטים, מחפשים מינימום ב-n-i אלמנטים: O(n²).",
+      },
+      {
+        q: "מה מספר ההשוואות המינימלי לחיפוש בינארי במערך n=8?",
+        options: ["1", "3", "4", "8"],
+        correct: 0,
+        explanation: "במקרה הטוב, הערך הוא האמצעי ומוצאים ב-1 השוואה.",
+      },
+      {
+        q: "מה Merge Sort?",
+        options: [
+          "מיון עם זקיף",
+          "מיון המבוסס על פיצול + מיזוג: O(n log n)",
+          "מיון ב-O(n²) תמיד",
+          "מיון בסיסי",
+        ],
+        correct: 1,
+        explanation: "Merge Sort: פיצול רקורסיבי לחצאים, מיון כל חצי, מיזוג. סיבוכיות O(n log n).",
+      },
+      {
+        q: "מה בדיקת אופטימיזציה ב-Bubble Sort?",
+        options: [
+          "בדיקת גודל מערך",
+          "אם לא היו החלפות במעבר – המערך כבר ממוין, עצור",
+          "השוואת זוגות",
+          "שמירת מינימום",
+        ],
+        correct: 1,
+        explanation: "אם מעבר שלם ללא החלפות, המערך ממוין. מאפשר יציאה מוקדמת: O(n) במקרה הטוב.",
+      },
+      {
+        q: "מה הפלט: bubbleSort({5,3,1,4,2}, 5) → printf(\"%d\",arr[0]);",
+        options: ["5", "3", "1", "2"],
+        correct: 2,
+        explanation: "אחרי מיון עולה, האלמנט הראשון הוא הקטן ביותר = 1.",
+      },
+      {
+        q: "Insertion Sort מתאים ביותר ל:",
+        options: [
+          "מיון מיליון אלמנטים",
+          "מערכים קטנים או כמעט-ממוינים",
+          "מיון מחרוזות בלבד",
+          "מיון פנימי במעבד",
+        ],
+        correct: 1,
+        explanation: "Insertion Sort: O(n) על מערך ממוין, O(n²) כלל. עדיף לn קטן (<50).",
+      },
+      {
+        q: "מה בינארי עדיף על סדרתי עבור n=1,000,000?",
+        options: [
+          "בינארי: עד 20 שלבים, סדרתי: עד 1,000,000",
+          "בינארי לא עדיף",
+          "בינארי דורש מיון",
+          "שניהם דומים",
+        ],
+        correct: 0,
+        explanation: "log₂(1,000,000)≈20. ההבדל העצום מצדיק את עלות המיון.",
+      },
+      {
+        q: "מה הסיבוכיות של Quick Sort במקרה הממוצע?",
+        options: ["O(n²)", "O(n log n)", "O(n)", "O(log n)"],
+        correct: 1,
+        explanation: "Quick Sort: O(n log n) ממוצע, O(n²) במקרה גרוע (pivot גרוע).",
       },
     ],
   },
@@ -2984,6 +4219,10 @@ int main() {
     exercises: [
       "הגדר struct Rectangle ופונקציות area, perimeter.",
       "מיין מערך Points לפי מרחק מהראשית.",
+      "הגדר struct Student עם שם, ת.ז., ומערך ציונים. כתוב פונקציות קריאה והדפסה.",
+      "ממש union שיכול להחזיק int, float, או char ופונקציה שמדפיסה לפי סוג.",
+      "כתוב פונקציה שממיינת מערך Structs לפי שדה נבחר.",
+      "הגדר struct LinkedNode {int val; struct LinkedNode *next;} ובנה רשימה מקושרת.",
     ],
     challenge:
       "ממש מערך dynamic של Students עם malloc, כולל הוספה, מחיקה וחיפוש לפי שם.",
@@ -2992,6 +4231,126 @@ int main() {
         q: "אם Student *p, איך ניגשים לשדה grade?",
         options: ["p.grade", "p->grade", "*p.grade", "&p.grade"],
         correct: 1,
+        explanation: "p->grade שקול ל-(*p).grade. הסימן -> מנתר מצביע ואז ניגש לשדה.",
+      },
+      {
+        q: "מה struct ב-C?",
+        options: [
+          "מחרוזת מיוחדת",
+          "מבנה נתונים המאגד שדות מטיפוסים שונים",
+          "מערך דינמי",
+          "סוג לולאה",
+        ],
+        correct: 1,
+        explanation: "struct = record: אוסף שדות (fields) מטיפוסים שונים תחת שם אחד.",
+      },
+      {
+        q: "מה הפלט: struct P{int x,y;}; struct P p={3,4}; printf(\"%d\",p.x+p.y);",
+        options: ["3", "4", "7", "12"],
+        correct: 2,
+        explanation: "p.x=3, p.y=4. 3+4=7.",
+      },
+      {
+        q: "מה -> עושה?",
+        options: [
+          "השוואה",
+          "ניגש לשדה struct דרך מצביע",
+          "מחזיר כתובת",
+          "operator חץ",
+        ],
+        correct: 1,
+        explanation: "p->field שקול ל-(*p).field. מנתר מצביע ומגיע לשדה.",
+      },
+      {
+        q: "מה הפלט: typedef struct{int x;}P; P a; a.x=10; printf(\"%d\",a.x);",
+        options: ["0", "10", "שגיאה", "P"],
+        correct: 1,
+        explanation: "typedef יוצר שם P למבנה. a.x=10 → הדפסת 10.",
+      },
+      {
+        q: "מה union?",
+        options: [
+          "כמו struct אבל כל השדות חולקים אותו זיכרון",
+          "union של שתי מחרוזות",
+          "מיזוג של שני מבנים",
+          "מבנה ירושה",
+        ],
+        correct: 0,
+        explanation: "union: שדות חולקים אותו מקום בזיכרון. גודל = גודל השדה הגדול.",
+      },
+      {
+        q: "מה גודל struct{int a; double b; char c;} בזיכרון (בדרך כלל)?",
+        options: ["13 בתים", "16 בתים (עם padding)", "8 בתים", "24 בתים"],
+        correct: 1,
+        explanation: "int=4, double=8, char=1. עם padding/alignment: לרוב 16 בתים.",
+      },
+      {
+        q: "מה הפלט: struct P{int x;} p={5}; struct P q=p; q.x=10; printf(\"%d\",p.x);",
+        options: ["5", "10", "0", "שגיאה"],
+        correct: 0,
+        explanation: "struct p מוקצה ב-copy. שינוי q.x לא משפיע על p.x. פלט: 5.",
+      },
+      {
+        q: "כיצד מעבירים struct לפונקציה ללא עותק (לחיסכון בזיכרון)?",
+        options: [
+          "מעבירים כמו int",
+          "מעבירים מצביע: void f(Student *s)",
+          "מעבירים עם &&",
+          "לא ניתן",
+        ],
+        correct: 1,
+        explanation: "העברת מצביע ל-struct: void f(Student *s). חוסך העתקת המבנה כולו.",
+      },
+      {
+        q: "מה הפלט: struct P{int n;}; P pts[3]={{1},{2},{3}}; printf(\"%d\",pts[1].n);",
+        options: ["1", "2", "3", "שגיאה"],
+        correct: 1,
+        explanation: "pts[1] = אלמנט שני = {2}. pts[1].n = 2.",
+      },
+      {
+        q: "מה מאפיין union לעומת struct?",
+        options: [
+          "union תמיד גדול יותר",
+          "union גודלו = גודל השדה הגדול בלבד",
+          "union לא ניתן לשימוש עם מצביעים",
+          "אין הבדל מעשי",
+        ],
+        correct: 1,
+        explanation: "union{int i; double d;}: גודל=sizeof(double)=8. struct: 4+8=12 (לפחות).",
+      },
+      {
+        q: "מה הדרך להגדיר struct ו-typedef ביחד?",
+        options: [
+          "struct typedef Point{...}",
+          "typedef struct{double x,y;} Point;",
+          "define Point struct{...}",
+          "class Point{...}",
+        ],
+        correct: 1,
+        explanation: "typedef struct{double x,y;} Point; מאפשר להשתמש ב-Point ישירות במקום struct Point.",
+      },
+      {
+        q: "כיצד מאתחלים struct?",
+        options: [
+          "struct P p; p={1,2};",
+          "struct P p = {1, 2};",
+          "struct P p; init(p,1,2);",
+          "P p = new P(1,2);",
+        ],
+        correct: 1,
+        explanation: "אתחול בהגדרה: struct P p = {val1, val2}; לפי סדר השדות.",
+      },
+      {
+        q: "מה מחזיר sizeof(union{int i; double d;})?",
+        options: ["4", "8", "12", "16"],
+        correct: 1,
+        explanation: "גודל union = גודל השדה הגדול = sizeof(double) = 8.",
+      },
+      {
+        q: "מה p->x שקול ל?",
+        options: ["p.x", "(*p).x", "&p.x", "*p.x"],
+        correct: 1,
+        explanation: "p->x ≡ (*p).x. קודם מנתרים את p, אז ניגשים לשדה x.",
       },
     ],
   },
@@ -3137,19 +4496,168 @@ int main() {
       "כתוב מאקרו CLAMP(x,lo,hi) שמחזיר x מוגבל לתחום [lo,hi].",
       "כתוב מאקרו IS_EVEN(n) שבודק אם מספר זוגי.",
       "צור קובץ header math_utils.h עם מאקרו ואבטיפוסים.",
+      "כתוב מאקרו SWAP(a,b,type) שמחליף שני משתנים.",
+      "ממש include guard נכון עם #ifndef/#define/#endif.",
+      "כתוב מאקרו DEBUG_PRINT(x) שמדפיס רק אם DEBUG מוגדר.",
+      "הגדר מאקרו ARRAY_SIZE(arr) שמחשב מספר אלמנטים במערך.",
     ],
     challenge:
       "ממש ספרייה statistics.h עם פונקציות mean, variance, stddev ומאקרו שימושיים.",
     quiz: [
       {
         q: "מה #ifndef MYLIB_H משמש ל?",
+        options: ["בדיקת גרסה", "מניעת הכללה כפולה של header", "הגדרת macro", "ייבוא ספרייה"],
+        correct: 1,
+        explanation: "include guard: אם MYLIB_H לא מוגדר, הגדר אותו ואז כלול את תוכן הheader. מונע הכפלה.",
+      },
+      {
+        q: "מה #define MAX(a,b) ((a)>(b)?(a):(b)) עושה?",
         options: [
-          "בדיקת גרסה",
-          "מניעת הכללה כפולה של header",
-          "הגדרת macro",
-          "ייבוא ספרייה",
+          "מגדיר קבוע MAX",
+          "מגדיר מאקרו שמחזיר המקסימום",
+          "מגדיר פונקציה",
+          "שגיאת תחביר",
         ],
         correct: 1,
+        explanation: "מאקרו פונקציה-דמוי. הסוגריים הכפולים מגנים מטעויות כמו MAX(a++,b).",
+      },
+      {
+        q: "מה ההבדל בין מאקרו לפונקציה?",
+        options: [
+          "אין הבדל",
+          "מאקרו: החלפת טקסט בקומפילציה, ללא type checking; פונקציה: קריאה בזמן ריצה",
+          "פונקציה מהירה יותר תמיד",
+          "מאקרו עובד רק עם int",
+        ],
+        correct: 1,
+        explanation: "מאקרו = textual substitution. יתרון: מהיר (ללא overhead), חסרון: ללא type check ועלול להתנהג בצורה לא צפויה.",
+      },
+      {
+        q: "מה ההבדל בין #include <file.h> ל-#include \"file.h\"?",
+        options: [
+          "אין הבדל",
+          "<> מחפש בספריות מערכת, \"\" מחפש בתיקייה הנוכחית קודם",
+          "\"\" לקבצים מערכת בלבד",
+          "<> לקבצים מקומיים",
+        ],
+        correct: 1,
+        explanation: "<> = ספריות מערכת (כגון stdio.h). \"\" = קובץ מקומי של הפרויקט.",
+      },
+      {
+        q: "מה #define PI 3.14159 עושה?",
+        options: [
+          "משנה PI בזמן ריצה",
+          "מגדיר קבוע טקסטואלי שהמהדר מחליף לפני קומפילציה",
+          "יוצר משתנה גלובלי",
+          "מייבא ערך pi",
+        ],
+        correct: 1,
+        explanation: "preprocessor מחליף כל הופעה של PI ב-3.14159 לפני קומפילציה.",
+      },
+      {
+        q: "מה #ifdef DEBUG...#endif עושה?",
+        options: [
+          "הידור מותנה – קוד מקומפל רק אם DEBUG מוגדר",
+          "בדיקת שגיאות debug",
+          "הדפסת debug אוטומטית",
+          "מפסיק את הקומפילציה",
+        ],
+        correct: 0,
+        explanation: "הידור מותנה: אם DEBUG מוגדר (-DDEBUG), הקוד בתוך ה-#ifdef יקומפל.",
+      },
+      {
+        q: "מה קובץ .h (header) מכיל?",
+        options: [
+          "מימוש הפונקציות",
+          "הצהרות (prototypes), הגדרות מאקרו, typedef",
+          "קוד הרצה",
+          "הגדרות משתנים בלבד",
+        ],
+        correct: 1,
+        explanation: "header: הצהרות, מאקרו, typedef, struct definitions. הmімוש בקובץ .c נפרד.",
+      },
+      {
+        q: "מה סכנת המאקרו: #define SQUARE(x) x*x?",
+        options: [
+          "לא עובד עם float",
+          "SQUARE(1+2) = 1+2*1+2 = 7 במקום 9",
+          "אין סכנה",
+          "איטי מדי",
+        ],
+        correct: 1,
+        explanation: "הרחבה: SQUARE(1+2) → 1+2*1+2 = 5. הפתרון: #define SQUARE(x) ((x)*(x)).",
+      },
+      {
+        q: "מה __LINE__ ו-__FILE__ ב-C?",
+        options: [
+          "פונקציות debug",
+          "מאקרו מובנים – מספר שורה ושם קובץ",
+          "פקודות קומפילציה",
+          "ערכים קבועים",
+        ],
+        correct: 1,
+        explanation: "Predefined macros: __LINE__ = מספר שורה נוכחית, __FILE__ = שם קובץ. שימושי ב-debug.",
+      },
+      {
+        q: "מה מאפשרת הנחיית #pragma?",
+        options: [
+          "ייבוא ספרייה",
+          "הנחיות ספציפיות למהדר (כגון #pragma once)",
+          "הגדרת מאקרו",
+          "תיעוד",
+        ],
+        correct: 1,
+        explanation: "#pragma once = אלטרנטיבה לinclude guard. ספציפי למהדר ולא תקני לחלוטין.",
+      },
+      {
+        q: "מה #undef MAX עושה?",
+        options: [
+          "מגדיר MAX מחדש",
+          "מבטל הגדרת המאקרו MAX",
+          "שגיאת קומפילציה",
+          "מגדיר MAX=0",
+        ],
+        correct: 1,
+        explanation: "#undef מבטל הגדרה קיימת של מאקרו. שימושי לheredefinition.",
+      },
+      {
+        q: "מה הדרך הנכונה לכתוב מאקרו עם מספר פקודות?",
+        options: [
+          "#define F(x) {stmt1; stmt2;}",
+          "#define F(x) do{stmt1; stmt2;}while(0)",
+          "#define F(x) (stmt1, stmt2)",
+          "מאקרו לא יכול להכיל מספר פקודות",
+        ],
+        correct: 1,
+        explanation: "do{...}while(0) מאפשר שימוש נכון עם if ללא סוגריים: if(c) F(x); else ...",
+      },
+      {
+        q: "מה הפלט: #define DOUBLE(x) (x)+(x) printf(\"%d\", 2*DOUBLE(3));",
+        options: ["12", "9", "6", "8"],
+        correct: 1,
+        explanation: "2*DOUBLE(3) → 2*(3)+(3) = 6+3 = 9. סכנה! צריך: #define DOUBLE(x) ((x)+(x)).",
+      },
+      {
+        q: "מה header guard מונע?",
+        options: [
+          "שגיאות runtime",
+          "הכללה כפולה של אותו קובץ header",
+          "שגיאות syntax",
+          "דליפות זיכרון",
+        ],
+        correct: 1,
+        explanation: "ללא guard, אם header נכלל פעמיים, struct/typedef מוגדרים פעמיים → שגיאת קומפילציה.",
+      },
+      {
+        q: "מה החיסרון של מאקרו לעומת inline function?",
+        options: [
+          "מאקרו איטי יותר",
+          "ללא type checking, עלול לגרום לתופעות לוואי",
+          "מאקרו לא ניתן להגדרה",
+          "פחות גמיש",
+        ],
+        correct: 1,
+        explanation: "מאקרו: ללא בדיקת טיפוסים, DOUBLE(i++) → i++ הוערך פעמיים. inline function בטוחה יותר.",
       },
     ],
   },
@@ -3284,6 +4792,11 @@ int main() {
     exercises: [
       "כתוב פונקציה createMatrix(rows, cols) עם malloc דו-ממדי.",
       "ממש מחסנית דינמית (push/pop עם realloc).",
+      "כתוב פונקציה safeStrDup שמשכפלת מחרוזת דינמית ומחזירה NULL בכישלון.",
+      "ממש תור (queue) דינמי עם malloc/realloc.",
+      "כתוב פונקציה freeMatrix(int **mat, int rows) שמשחררת מטריצה דינמית.",
+      "ממש dynamic array עם capacity שמוכפל בכל גלישה (כמו vector).",
+      "כתוב תכנית שקוראת n מספרים מהמשתמש, מקצה מערך דינמי, ומדפיסה ממוצע.",
     ],
     challenge:
       "ממש ספרייה dynamic_array עם: create, push_back, pop_back, get, size, free.",
@@ -3292,6 +4805,156 @@ int main() {
         q: "מה מחזיר malloc כשנכשל?",
         options: ["0", "NULL", "-1", "שגיאה"],
         correct: 1,
+        explanation: "malloc מחזיר NULL כשלא מצליח להקצות זיכרון. תמיד לבדוק if(ptr==NULL).",
+      },
+      {
+        q: "מה ההבדל בין Stack ל-Heap?",
+        options: [
+          "Stack גדול יותר",
+          "Stack: אוטומטי, קטן. Heap: ידני (malloc), גדול",
+          "Heap מהיר יותר",
+          "אין הבדל",
+        ],
+        correct: 1,
+        explanation: "Stack: מנוהל אוטומטית, מהיר, מוגבל (~8MB). Heap: malloc/free, גמיש, גדול (GBs).",
+      },
+      {
+        q: "מה ההבדל בין malloc ל-calloc?",
+        options: [
+          "אין הבדל",
+          "calloc מאפס את הזיכרון, malloc לא",
+          "malloc מאפס, calloc לא",
+          "calloc עבור טיפוסים גדולים בלבד",
+        ],
+        correct: 1,
+        explanation: "malloc(n): מקצה n בתים, לא מאופס. calloc(n,size): מקצה ומאפס. calloc בטוח יותר.",
+      },
+      {
+        q: "מה memory leak?",
+        options: [
+          "זיכרון פיזי פגום",
+          "הקצאת זיכרון שלא שוחרר → זיכרון אבוד",
+          "גישה לזיכרון לא חוקי",
+          "overflow",
+        ],
+        correct: 1,
+        explanation: "memory leak = malloc ללא free. התכנית צורכת זיכרון שגדל עד שנגמר הזיכרון.",
+      },
+      {
+        q: "מה dangling pointer?",
+        options: [
+          "מצביע NULL",
+          "מצביע שמצביע על זיכרון שכבר שוחרר",
+          "מצביע לא מאותחל",
+          "מצביע ל-stack",
+        ],
+        correct: 1,
+        explanation: "אחרי free(p), p עדיין מכיל את הכתובת אבל הזיכרון שוחרר. גישה = undefined behavior.",
+      },
+      {
+        q: "מה realloc עושה?",
+        options: [
+          "מאפס זיכרון קיים",
+          "משנה גודל הקצאה קיימת",
+          "מקצה זיכרון חדש בלבד",
+          "משחרר ומקצה מחדש תמיד",
+        ],
+        correct: 1,
+        explanation: "realloc(ptr, new_size): מגדיל/מקטין הקצאה. עשוי להחזיר כתובת חדשה!",
+      },
+      {
+        q: "מה int *arr = malloc(5*sizeof(int)) מקצה?",
+        options: [
+          "5 בתים",
+          "20 בתים (5×4) לint",
+          "5 מצביעים",
+          "גודל לא ידוע",
+        ],
+        correct: 1,
+        explanation: "sizeof(int)=4. 5×4=20 בתים. מקצה מקום ל-5 int-ים.",
+      },
+      {
+        q: "מה הפלט: int *p=malloc(sizeof(int)); *p=42; printf(\"%d\",*p); free(p); p=NULL;",
+        options: ["NULL", "42", "0", "שגיאה"],
+        correct: 1,
+        explanation: "*p=42 שומר 42 בזיכרון. הדפסה לפני free: 42. p=NULL אחרי free מונע dangling pointer.",
+      },
+      {
+        q: "מה הסדר הנכון: free(ptr) ואז ptr=NULL, או ptr=NULL ואז free(ptr)?",
+        options: [
+          "ptr=NULL קודם",
+          "free(ptr) קודם, ואז ptr=NULL",
+          "אין הבדל",
+          "לא צריך NULL",
+        ],
+        correct: 1,
+        explanation: "free(ptr) משחרר. אחר כך ptr=NULL מונע גישה בטעות לזיכרון ששוחרר.",
+      },
+      {
+        q: "מה calloc(10, sizeof(double)) מקצה?",
+        options: [
+          "10 בתים",
+          "80 בתים (10×8), מאופסים",
+          "80 בתים, לא מאופסים",
+          "10 double",
+        ],
+        correct: 1,
+        explanation: "calloc(10, sizeof(double)): 10×8=80 בתים, כולם מאופסים ל-0.",
+      },
+      {
+        q: "איזה כלי עוזר לזהות memory leaks?",
+        options: [
+          "gcc",
+          "valgrind",
+          "gdb",
+          "make",
+        ],
+        correct: 1,
+        explanation: "valgrind = כלי לניתוח זיכרון: מזהה leaks, dangling pointers, uninitiated memory.",
+      },
+      {
+        q: "מה הסכנה ב: int *p=malloc(4); free(p); *p=5;?",
+        options: [
+          "ללא סכנה",
+          "use-after-free: גישה לזיכרון ששוחרר",
+          "double free",
+          "שגיאת קומפילציה",
+        ],
+        correct: 1,
+        explanation: "use-after-free = גישה לזיכרון שכבר הוחזר למערכת = undefined behavior, קריסה.",
+      },
+      {
+        q: "מה double free?",
+        options: [
+          "שחרור double",
+          "קריאה כפולה ל-free על אותו מצביע",
+          "שחרור ב-2 פונקציות",
+          "שחרור מהיר",
+        ],
+        correct: 1,
+        explanation: "double free: free(p) פעמיים. undefined behavior – עלול להביא לקריסה או פגיעת אבטחה.",
+      },
+      {
+        q: "מה ptr = realloc(ptr, new_size) עושה אם new_size=0?",
+        options: [
+          "אינו שינוי",
+          "שחרור הזיכרון (כמו free)",
+          "מחזיר ptr המקורי",
+          "שגיאה",
+        ],
+        correct: 1,
+        explanation: "realloc(ptr,0) = free(ptr). מחזיר NULL או כתובת שלא ניתן לגשת אליה.",
+      },
+      {
+        q: "מה הדרך הנכונה לבדוק תוצאת malloc?",
+        options: [
+          "if(ptr > 0)",
+          "if(ptr != NULL)",
+          "if(ptr == 0)",
+          "לא צריך לבדוק",
+        ],
+        correct: 1,
+        explanation: "תמיד: if(ptr == NULL) { /* שגיאה */ }. malloc יכול להיכשל אם אין זיכרון.",
       },
     ],
   },
@@ -3445,6 +5108,11 @@ int main() {
     exercises: [
       "כתוב תכנית שסופרת שורות, מילים ותווים בקובץ טקסט.",
       "כתוב תכנית שמעתיקה קובץ (כולל בינארי).",
+      "כתוב תכנית שממיינת שורות בקובץ טקסט ושומרת לקובץ חדש.",
+      "כתוב תכנית שמחפשת מחרוזת בקובץ ומדפיסה את מספרי השורות שבהן היא מופיעה.",
+      "ממש תכנית שמוחקת שורות כפולות מקובץ.",
+      "כתוב תכנית שקוראת קובץ CSV ומחשבת סטטיסטיקות על עמודה מספרית.",
+      "ממש תכנית שמציגה n השורות האחרונות של קובץ (כמו tail).",
     ],
     challenge:
       "ממש ספר טלפונים מבוסס קובץ: הוסף, מחק, חפש, הצג כל הרשומות.",
@@ -3453,6 +5121,151 @@ int main() {
         q: "מה מחזיר fscanf בסוף קובץ?",
         options: ["0", "EOF (-1)", "NULL", "1"],
         correct: 1,
+        explanation: "fscanf מחזיר EOF (שווה ל--1) כשמגיע לסוף הקובץ.",
+      },
+      {
+        q: "מה מחזיר fopen אם הקובץ לא נפתח?",
+        options: ["0", "NULL", "-1", "EOF"],
+        correct: 1,
+        explanation: "fopen מחזיר NULL בכישלון. תמיד: if(f==NULL) { perror(); return; }",
+      },
+      {
+        q: "מה מצב \"r\" ב-fopen?",
+        options: [
+          "קריאה + כתיבה",
+          "קריאה בלבד מהתחלה",
+          "כתיבה בלבד",
+          "הוספה לסוף",
+        ],
+        correct: 1,
+        explanation: "\"r\" = read only. הקובץ חייב להתקיים. \"w\" = write (מוחק קיים), \"a\" = append.",
+      },
+      {
+        q: "מה \"a\" ב-fopen?",
+        options: [
+          "append – הוספה לסוף הקובץ",
+          "read all",
+          "כתיבה ממחיקה את הקיים",
+          "archive",
+        ],
+        correct: 0,
+        explanation: "\"a\" = append: הכתיבה תמיד בסוף הקובץ. הקובץ נוצר אם לא קיים.",
+      },
+      {
+        q: "מה חשוב לעשות אחרי fopen?",
+        options: [
+          "rewind(f)",
+          "לבדוק if(f==NULL) ולסגור עם fclose בסוף",
+          "לקרוא fread",
+          "לקרוא fseek",
+        ],
+        correct: 1,
+        explanation: "תמיד: לבדוק NULL, ולסגור fclose(f) בסוף. ללא fclose יתכן איבוד נתונים.",
+      },
+      {
+        q: "מה fprintf(f, \"%d\", 42) עושה?",
+        options: [
+          "מדפיס ל-stdout",
+          "כותב \"42\" לקובץ f",
+          "קורא מהקובץ",
+          "מחזיר 42",
+        ],
+        correct: 1,
+        explanation: "fprintf = printf לקובץ. כותב formatted text לקובץ f.",
+      },
+      {
+        q: "מה fgets(buf, 100, f) עושה?",
+        options: [
+          "קוראת 100 שורות",
+          "קוראת שורה (עד \\n) מהקובץ לbuf",
+          "כותבת שורה",
+          "קוראת תו אחד",
+        ],
+        correct: 1,
+        explanation: "fgets קוראת עד n-1 תווים או עד \\n. שמירת ה-\\n בbuf. בטוח מ-buffer overflow.",
+      },
+      {
+        q: "מה EOF?",
+        options: [
+          "שגיאת קובץ",
+          "End Of File – ערך מיוחד (-1) המסמן סוף קובץ",
+          "ערך NULL",
+          "תחילת קובץ",
+        ],
+        correct: 1,
+        explanation: "EOF = End Of File, בדרך כלל -1. מוחזר ע\"י getc/fscanf בסוף הקובץ.",
+      },
+      {
+        q: "מה fwrite עושה לעומת fprintf?",
+        options: [
+          "fwrite כותב טקסט, fprintf בינארי",
+          "fwrite כותב בינארי (bytes גולמיים), fprintf כותב formatted text",
+          "אין הבדל",
+          "fwrite לא קיים",
+        ],
+        correct: 1,
+        explanation: "fwrite(ptr,size,n,f): כותב n×size בתים גולמיים. מהיר יותר לנתונים בינאריים.",
+      },
+      {
+        q: "מה fseek(f, 0, SEEK_SET) עושה?",
+        options: [
+          "מחזיר את גודל הקובץ",
+          "מזיז את מיקום הקריאה לתחילת הקובץ",
+          "מוחק את הקובץ",
+          "סוגר את הקובץ",
+        ],
+        correct: 1,
+        explanation: "fseek(f, offset, origin): מזיז cursor. SEEK_SET=תחילה, 0=offset=0. שקול ל-rewind(f).",
+      },
+      {
+        q: "מה ftell(f) מחזיר?",
+        options: [
+          "גודל הקובץ",
+          "מיקום הנוכחי בקובץ (bytes מהתחלה)",
+          "מספר שורות",
+          "NULL",
+        ],
+        correct: 1,
+        explanation: "ftell מחזיר את מיקום הcursor הנוכחי בבתים מתחילת הקובץ.",
+      },
+      {
+        q: "מה הבדל בין \"rb\" ל-\"r\"?",
+        options: [
+          "אין הבדל ב-Linux",
+          "rb = קריאה בינארית, r = קריאת טקסט (המרת \\r\\n ב-Windows)",
+          "rb מהיר יותר",
+          "rb לקבצים גדולים",
+        ],
+        correct: 1,
+        explanation: "ב-Windows: \"r\" ממיר \\r\\n ל-\\n. \"rb\" קורא raw bytes ללא המרה.",
+      },
+      {
+        q: "מה fgetc(f) מחזיר?",
+        options: ["מחרוזת", "תו אחד כ-int (או EOF)", "שורה שלמה", "מספר שלם"],
+        correct: 1,
+        explanation: "fgetc קוראת תו אחד ומחזירה אותו כ-int (כדי לאפשר ייצוג EOF).",
+      },
+      {
+        q: "למה חשוב לסגור קובץ עם fclose?",
+        options: [
+          "לא חשוב",
+          "לוודא שנתונים נכתבו (flush), ושחרור משאבי OS",
+          "כדי למנוע קריסה",
+          "רק לקבצי כתיבה",
+        ],
+        correct: 1,
+        explanation: "fclose: מבצע flush לbuffer, משחרר FILE*, וסוגר file descriptor. ללא זה: נתונים עלולים ללכת לאיבוד.",
+      },
+      {
+        q: "מה הדרך הנכונה לעבור על כל שורות קובץ?",
+        options: [
+          "while(fread(...)) {...}",
+          "while(fgets(buf, SIZE, f) != NULL) {...}",
+          "for(fscanf(f,...); !EOF; ...) {...}",
+          "do{fgetc(f);}while(!EOF);",
+        ],
+        correct: 1,
+        explanation: "fgets מחזיר NULL בסוף קובץ. while(fgets(...) != NULL) עובר על כל השורות.",
       },
     ],
   },
@@ -3573,6 +5386,11 @@ int main() {
     exercises: [
       "כתוב פונקציה שבודקת אם מספר הוא חזקת 2 באמצעות bitwise.",
       "כתוב XOR swap ללא משתנה זמני.",
+      "כתוב פונקציה countBits(n) שסופרת מספר ביטים דלוקים.",
+      "כתוב פונקציה שהופכת כל ביט של מספר (NOT).",
+      "ממש מחלקת רשאיות (permissions) עם 3 ביטים: קריאה, כתיבה, הרצה.",
+      "כתוב פונקציה שממירה מספר לבינארי כמחרוזת.",
+      "ממש פעולת Rotate Left על מספר שלם.",
     ],
     challenge:
       "ממש bitset: מבנה נתונים לניהול 64 דגלים ב-unsigned long long.",
@@ -3581,6 +5399,106 @@ int main() {
         q: "מה תוצאת 6 ^ 6?",
         options: ["6", "0", "12", "1"],
         correct: 1,
+        explanation: "XOR של מספר עם עצמו = 0. כל ביט: 1^1=0, 0^0=0.",
+      },
+      {
+        q: "מה תוצאת 5 & 3?",
+        options: ["8", "1", "7", "0"],
+        correct: 1,
+        explanation: "5=101, 3=011. AND: 001 = 1.",
+      },
+      {
+        q: "מה תוצאת 5 | 3?",
+        options: ["8", "7", "2", "1"],
+        correct: 1,
+        explanation: "5=101, 3=011. OR: 111 = 7.",
+      },
+      {
+        q: "מה עושה 1 << 3?",
+        options: ["1", "3", "8", "16"],
+        correct: 2,
+        explanation: "1<<3 = 1×2³ = 8. הזזה שמאלה n מקומות = כפל ב-2^n.",
+      },
+      {
+        q: "מה עושה 40 >> 2?",
+        options: ["10", "160", "20", "5"],
+        correct: 0,
+        explanation: "40>>2 = 40/4 = 10. הזזה ימינה n = חלוקה ב-2^n.",
+      },
+      {
+        q: "מה ~0 שווה (לint של 32 ביט)?",
+        options: ["0", "1", "-1 (כל הביטים 1)", "2^32"],
+        correct: 2,
+        explanation: "NOT של 0 = כל הביטים הופכים ל-1. בייצוג two's complement: -1.",
+      },
+      {
+        q: "כיצד בודקים אם ביט i של x דלוק?",
+        options: ["x + (1<<i)", "x & (1<<i)", "x | (1<<i)", "x ^ (1<<i)"],
+        correct: 1,
+        explanation: "x & (1<<i): AND עם מסכה שרק ביט i דלוק. תוצאה לא-אפס = ביט דלוק.",
+      },
+      {
+        q: "כיצד מדליקים ביט i ב-x?",
+        options: ["x & ~(1<<i)", "x | (1<<i)", "x ^ (1<<i)", "x - (1<<i)"],
+        correct: 1,
+        explanation: "x | (1<<i): OR עם מסכה → ביט i הופך ל-1, שאר הביטים ללא שינוי.",
+      },
+      {
+        q: "כיצד מכבים ביט i ב-x?",
+        options: ["x | (1<<i)", "x ^ (1<<i)", "x & ~(1<<i)", "x - i"],
+        correct: 2,
+        explanation: "~(1<<i) = מסכה עם כל הביטים 1 חוץ מביט i. AND → ביט i=0, שאר ללא שינוי.",
+      },
+      {
+        q: "מה תוצאת 12 & 10?",
+        options: ["22", "8", "6", "2"],
+        correct: 1,
+        explanation: "12=1100, 10=1010. AND: 1000 = 8.",
+      },
+      {
+        q: "XOR ידוע כ-toggle. מה x ^ 1 עושה לביט הנמוך של x?",
+        options: ["מדליק אותו", "מכבה אותו", "הופך אותו (toggle)", "אינו משנה"],
+        correct: 2,
+        explanation: "XOR עם 1 הופך את הביט: 0→1, 1→0. זהו toggle.",
+      },
+      {
+        q: "מה n & (n-1) בודק?",
+        options: [
+          "אם n ראשוני",
+          "אם n חזקת 2 (התוצאה תהיה 0)",
+          "אם n זוגי",
+          "אם n שלם",
+        ],
+        correct: 1,
+        explanation: "אם n הוא חזקת 2: n=100...0, n-1=011...1. AND = 0. כלי נפוץ: if(n>0 && !(n&(n-1)))",
+      },
+      {
+        q: "מה הפלט: printf(\"%d\", 0xFF & 0x0F);",
+        options: ["255", "15", "240", "0"],
+        correct: 1,
+        explanation: "0xFF=11111111, 0x0F=00001111. AND: 00001111 = 15.",
+      },
+      {
+        q: "מה XOR swap עושה: a^=b; b^=a; a^=b;?",
+        options: [
+          "מנקה את a",
+          "מחליף ערכי a ו-b ללא משתנה זמני",
+          "כופל ב-2",
+          "בודק שוויון",
+        ],
+        correct: 1,
+        explanation: "XOR swap: מחליף ערכי שני משתנים ללא temp. טריק קלאסי. נכשל אם a==b.",
+      },
+      {
+        q: "מה הבדל בין & הביטי ל-&& הלוגי?",
+        options: [
+          "אין הבדל",
+          "& פועל על כל הביטים, && על הערך הלוגי (true/false)",
+          "&& מהיר יותר",
+          "& עובד רק עם char",
+        ],
+        correct: 1,
+        explanation: "5 & 3 = 1 (ביטי). 5 && 3 = 1 (לוגי – שניהם לא-אפס). || לעומת |.",
       },
     ],
   },
@@ -3765,16 +5683,116 @@ int main() {
           "שגיאת קומפילציה",
         ],
         correct: 1,
+        explanation: "כל קריאה רקורסיבית מוסיפה frame ל-stack. רקורסיה ללא תנאי עצירה → stack מתמלא → קריסה.",
       },
       {
         q: "מה הפלט של factorial(0)?",
         options: ["0", "1", "שגיאה", "-1"],
         correct: 1,
+        explanation: "0! = 1 בהגדרה. תנאי הבסיס: if(n<=1) return 1.",
       },
       {
         q: "מה הסיבוכיות של fibonacci(n) הנאיבי (ללא memoization)?",
         options: ["O(n)", "O(n²)", "O(2^n)", "O(log n)"],
         correct: 2,
+        explanation: "fib(n) = fib(n-1)+fib(n-2). עץ קריאות כפולות: O(2^n) פעולות.",
+      },
+      {
+        q: "מה תנאי הבסיס (base case) ברקורסיה?",
+        options: [
+          "הקריאה הראשונה",
+          "תנאי שעוצר את הרקורסיה ומחזיר תוצאה ישירה",
+          "הקריאה האחרונה",
+          "תנאי מעבר",
+        ],
+        correct: 1,
+        explanation: "בלי תנאי בסיס: רקורסיה אינסופית. תנאי בסיס = המקרה הפשוט שנפתר ישירות.",
+      },
+      {
+        q: "מה הפלט: factorial(5)?",
+        options: ["25", "120", "720", "5"],
+        correct: 1,
+        explanation: "5! = 5×4×3×2×1 = 120.",
+      },
+      {
+        q: "מה gcd(48,18) מחזיר?",
+        options: ["6", "18", "48", "3"],
+        correct: 0,
+        explanation: "מחלק משותף גדול ביותר: gcd(48,18)=gcd(18,12)=gcd(12,6)=gcd(6,0)=6.",
+      },
+      {
+        q: "מה הפלט: fibonacci(7)?",
+        options: ["13", "21", "8", "34"],
+        correct: 0,
+        explanation: "סדרת פיבונאצ'י: 0,1,1,2,3,5,8,13,21. fib(7)=13.",
+      },
+      {
+        q: "מה היתרון של memoization ברקורסיה?",
+        options: [
+          "מקצר את הקוד",
+          "שומר תוצאות מחושבות למניעת חישוב כפול → O(n) במקום O(2^n)",
+          "מונע stack overflow",
+          "מגדיל זיכרון",
+        ],
+        correct: 1,
+        explanation: "memoization = שמירת תוצאות. fib(30) נאיבי: ~1M קריאות. עם memo: 30 קריאות.",
+      },
+      {
+        q: "מה מגדלי האנוי (Hanoi) עם n=3 דיסקים דורש?",
+        options: ["6 מהלכים", "7 מהלכים", "8 מהלכים", "9 מהלכים"],
+        correct: 1,
+        explanation: "מגדלי האנוי: 2^n - 1 מהלכים. n=3: 2³-1=7.",
+      },
+      {
+        q: "מה power(2, 10) מחזיר?",
+        options: ["512", "1024", "100", "20"],
+        correct: 1,
+        explanation: "2^10 = 1024.",
+      },
+      {
+        q: "מה הסיבוכיות של power(base, exp) המואץ (fast exponentiation)?",
+        options: ["O(n)", "O(log n)", "O(n²)", "O(1)"],
+        correct: 1,
+        explanation: "מחצים את exp בכל שלב: O(log n). למשל: 2^10 = (2^5)² = ((2^2)²×2)².",
+      },
+      {
+        q: "מה printBinary(13) ידפיס?",
+        options: ["13", "1101", "1110", "1011"],
+        correct: 1,
+        explanation: "13 בבינארי = 8+4+1 = 1101.",
+      },
+      {
+        q: "מה ההבדל בין iteration (לולאה) ל-recursion?",
+        options: [
+          "אין הבדל",
+          "recursion: פונקציה קוראת לעצמה (stack), iteration: לולאה חוזרת",
+          "recursion תמיד מהיר יותר",
+          "iteration: עבור מספרים בלבד",
+        ],
+        correct: 1,
+        explanation: "רקורסיה: אלגנטית לבעיות שמתפרקות טבעית, אך overhead של stack. iteration: מהיר יותר בדרך כלל.",
+      },
+      {
+        q: "מה tail recursion?",
+        options: [
+          "הקריאה הרקורסיבית בסוף הפונקציה, ניתנת לאופטימיזציה ל-O(1) stack",
+          "רקורסיה שמגיעה לsegfault",
+          "רקורסיה ב-loop",
+          "רקורסיה בלי תנאי",
+        ],
+        correct: 0,
+        explanation: "Tail recursion: קריאה רקורסיבית היא הפקודה האחרונה. מהדרים מסוימים מאפסים אותה ל-loop.",
+      },
+      {
+        q: "מה backtracking?",
+        options: [
+          "חזרה לתחילת הלולאה",
+          "חיפוש רקורסיבי שחוזר אחורה כשנתקל במבוי סתום",
+          "מיון הפוך",
+          "ניפוי שגיאות",
+        ],
+        correct: 1,
+        explanation: "Backtracking: ניסיון פתרון → אם נכשל, חזרה ושינוי. שימוש: Sudoku, Queens, מבוך.",
       },
     ],
   },
@@ -3853,18 +5871,51 @@ function TraceTable({ data }) {
   );
 }
 
-function QuizSection({ quiz, onComplete }) {
+function QuizSection({ quiz, chapterId, chapterTitle, onComplete }) {
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [bestScore, setBestScore] = useState(null);
   const score = submitted ? quiz.filter((q, i) => answers[i] === q.correct).length : 0;
+  const pct = submitted ? Math.round((score / quiz.length) * 100) : 0;
+
+  const handleSubmit = () => {
+    setSubmitted(true);
+    const s = quiz.filter((q, i) => answers[i] === q.correct).length;
+    const p = Math.round((s / quiz.length) * 100);
+    if (bestScore === null || p > bestScore) setBestScore(p);
+    onComplete(p);
+  };
+
+  const handleRetry = () => {
+    setAnswers({});
+    setSubmitted(false);
+  };
 
   return (
     <div>
+      {submitted && (
+        <div style={{ marginBottom: 24, padding: 20, background: pct === 100 ? `${C.accent3}15` : pct >= 60 ? `${C.warn}15` : `${C.danger}15`, borderRadius: 12, border: `1px solid ${pct === 100 ? C.accent3 : pct >= 60 ? C.warn : C.danger}`, textAlign: "center" }}>
+          <div style={{ fontSize: 40, marginBottom: 6 }}>{pct === 100 ? "🏆" : pct >= 80 ? "🌟" : pct >= 60 ? "👍" : "📚"}</div>
+          <div style={{ fontWeight: 900, fontSize: 28, color: pct === 100 ? C.accent3 : pct >= 60 ? C.warn : C.danger }}>
+            {score} / {quiz.length}
+          </div>
+          <div style={{ fontWeight: 800, fontSize: 18, color: pct === 100 ? C.accent3 : pct >= 60 ? C.warn : C.danger, marginTop: 2 }}>{pct}%</div>
+          <div style={{ color: C.muted, fontSize: 13, marginTop: 6 }}>
+            {pct === 100 ? "מושלם! שלטת בחומר 💪" : pct >= 80 ? "כמעט מושלם! עיין בתשובות האדומות." : pct >= 60 ? "טוב! עיין בתשובות הירוקות ונסה שוב." : "כדאי לחזור על החומר ולנסות שוב."}
+          </div>
+          {bestScore !== null && bestScore > pct && (
+            <div style={{ color: C.accent2, fontSize: 12, marginTop: 6 }}>הניסיון הטוב ביותר שלך: {bestScore}%</div>
+          )}
+          <button onClick={handleRetry} style={{ marginTop: 14, background: C.accent2, color: "#fff", border: "none", borderRadius: 8, padding: "9px 24px", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>
+            🔄 נסה שוב
+          </button>
+        </div>
+      )}
       {quiz.map((q, qi) => (
-        <div key={qi} style={{ marginBottom: 20, padding: 18, background: C.surface, borderRadius: 12, border: `1px solid ${C.border}` }}>
-          <div style={{ fontWeight: 700, marginBottom: 14, color: C.text, fontSize: 14 }}>
-            <span style={{ color: C.muted, fontSize: 12, marginLeft: 8 }}>Q{qi + 1}</span>
-            {q.q}
+        <div key={qi} style={{ marginBottom: 20, padding: 18, background: C.surface, borderRadius: 12, border: `1px solid ${submitted && answers[qi] !== undefined ? (answers[qi] === q.correct ? C.accent3 + "44" : C.danger + "44") : C.border}` }}>
+          <div style={{ fontWeight: 700, marginBottom: 14, color: C.text, fontSize: 14, display: "flex", gap: 10, alignItems: "flex-start" }}>
+            <span style={{ background: C.card, color: C.accent, fontSize: 11, fontWeight: 900, padding: "2px 8px", borderRadius: 6, flexShrink: 0, border: `1px solid ${C.border}` }}>Q{qi + 1}</span>
+            <span>{q.q}</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {q.options.map((opt, oi) => {
@@ -3874,36 +5925,36 @@ function QuizSection({ quiz, onComplete }) {
               if (submitted && answers[qi] === oi && oi !== q.correct) { bg = `${C.danger}18`; border = C.danger; color = C.danger; }
               return (
                 <button key={oi} onClick={() => !submitted && setAnswers(a => ({ ...a, [qi]: oi }))}
-                  style={{ textAlign: "right", padding: "10px 16px", background: bg, border: `1px solid ${border}`, borderRadius: 8, color, cursor: submitted ? "default" : "pointer", fontFamily: "inherit", fontSize: 13, transition: "all 0.15s" }}>
-                  <span style={{ color: C.muted, marginLeft: 8, fontSize: 11 }}>{String.fromCharCode(65 + oi)}.</span>
+                  style={{ textAlign: "right", padding: "10px 16px", background: bg, border: `1px solid ${border}`, borderRadius: 8, color, cursor: submitted ? "default" : "pointer", fontFamily: "inherit", fontSize: 13, transition: "all 0.15s", display: "flex", gap: 10, alignItems: "center" }}>
+                  <span style={{ background: `${color}22`, color, fontSize: 11, fontWeight: 900, minWidth: 22, height: 22, borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{String.fromCharCode(65 + oi)}</span>
                   {opt}
+                  {submitted && oi === q.correct && <span style={{ marginRight: "auto", color: C.accent3, fontSize: 14 }}>✓</span>}
+                  {submitted && answers[qi] === oi && oi !== q.correct && <span style={{ marginRight: "auto", color: C.danger, fontSize: 14 }}>✗</span>}
                 </button>
               );
             })}
           </div>
+          {submitted && answers[qi] !== q.correct && q.explanation && (
+            <div style={{ marginTop: 10, padding: "10px 14px", background: `${C.accent2}10`, borderRadius: 8, border: `1px solid ${C.accent2}33`, color: C.soft, fontSize: 13 }}>
+              💡 <strong style={{ color: C.accent2 }}>הסבר:</strong> {q.explanation}
+            </div>
+          )}
         </div>
       ))}
       {!submitted ? (
-        <button
-          onClick={() => {
-            setSubmitted(true);
-            const s = quiz.filter((q, i) => answers[i] === q.correct).length;
-            onComplete(Math.round((s / quiz.length) * 100));
-          }}
-          disabled={Object.keys(answers).length < quiz.length}
-          style={{ background: Object.keys(answers).length < quiz.length ? C.border : C.accent, color: "#000", border: "none", borderRadius: 10, padding: "12px 32px", fontWeight: 900, fontSize: 15, cursor: Object.keys(answers).length < quiz.length ? "default" : "pointer", opacity: Object.keys(answers).length < quiz.length ? 0.5 : 1 }}>
-          הגש בוחן ({Object.keys(answers).length}/{quiz.length})
-        </button>
-      ) : (
-        <div style={{ padding: 20, background: score === quiz.length ? `${C.accent3}15` : score >= quiz.length * 0.6 ? `${C.warn}15` : `${C.danger}15`, borderRadius: 12, border: `1px solid ${score === quiz.length ? C.accent3 : score >= quiz.length * 0.6 ? C.warn : C.danger}`, textAlign: "center" }}>
-          <div style={{ fontSize: 36, marginBottom: 6 }}>{score === quiz.length ? "🏆" : score >= quiz.length * 0.6 ? "👍" : "📚"}</div>
-          <div style={{ fontWeight: 900, fontSize: 22, color: score === quiz.length ? C.accent3 : score >= quiz.length * 0.6 ? C.warn : C.danger }}>
-            {score} / {quiz.length}
-          </div>
-          <div style={{ color: C.muted, fontSize: 13, marginTop: 4 }}>
-            {score === quiz.length ? "מושלם! שלטת בחומר." : score >= quiz.length * 0.6 ? "טוב! עיין בתשובות הירוקות." : "כדאי לחזור על החומר."}
-          </div>
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <button
+            onClick={handleSubmit}
+            disabled={Object.keys(answers).length < quiz.length}
+            style={{ background: Object.keys(answers).length < quiz.length ? C.border : C.accent, color: "#000", border: "none", borderRadius: 10, padding: "12px 32px", fontWeight: 900, fontSize: 15, cursor: Object.keys(answers).length < quiz.length ? "default" : "pointer", opacity: Object.keys(answers).length < quiz.length ? 0.5 : 1 }}>
+            הגש בוחן ({Object.keys(answers).length}/{quiz.length})
+          </button>
+          <span style={{ color: C.muted, fontSize: 13 }}>ענה על כל {quiz.length} השאלות</span>
         </div>
+      ) : (
+        <button onClick={handleRetry} style={{ background: C.accent2, color: "#fff", border: "none", borderRadius: 10, padding: "12px 32px", fontWeight: 900, fontSize: 15, cursor: "pointer" }}>
+          🔄 נסה שוב
+        </button>
       )}
     </div>
   );
@@ -4010,7 +6061,7 @@ function ChapterView({ chapter, onProgress }) {
     { id: "trace", label: "📊 מעקב" },
     { id: "questions", label: "🧠 שאלות" },
     { id: "exercises", label: "🛠 תרגילים" },
-    { id: "quiz", label: "✅ בוחן" },
+    { id: "quiz", label: `✅ בוחן (${chapter.quiz.length})` },
   ];
 
   return (
@@ -4102,7 +6153,7 @@ function ChapterView({ chapter, onProgress }) {
               ✅ בוחן – פרק {chapter.id}: {chapter.title}
               <span style={{ color: C.muted, fontSize: 12, fontWeight: 400, marginRight: 10 }}>({chapter.quiz.length} שאלות)</span>
             </div>
-            <QuizSection quiz={chapter.quiz} onComplete={(pct) => onProgress(chapter.id, pct)} />
+            <QuizSection key={chapter.id} quiz={chapter.quiz} chapterId={chapter.id} chapterTitle={chapter.title} onComplete={(pct) => onProgress(chapter.id, pct)} />
           </div>
         )}
       </div>
@@ -4134,9 +6185,11 @@ export default function CLearnApp() {
   const prevChapter = selected && selected.id > 1 ? CHAPTERS[selected.id - 2] : null;
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'Segoe UI', Tahoma, sans-serif", direction: "rtl", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'Segoe UI', Tahoma, sans-serif", direction: "rtl", display: "flex", flexDirection: "column", position: "relative" }}>
+      <GalaxyBackground />
+      <LofiButton />
       {/* Topbar */}
-      <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: "0 20px", display: "flex", alignItems: "center", gap: 14, height: 58, flexShrink: 0, position: "sticky", top: 0, zIndex: 100 }}>
+      <div style={{ background: "rgba(10,8,32,0.85)", backdropFilter: "blur(16px)", borderBottom: `1px solid ${C.border}`, padding: "0 20px", display: "flex", alignItems: "center", gap: 14, height: 58, flexShrink: 0, position: "sticky", top: 0, zIndex: 100 }}>
         <button onClick={() => setSidebar(s => !s)} style={{ background: "transparent", border: "none", color: C.muted, cursor: "pointer", fontSize: 18, padding: "4px 8px" }}>☰</button>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 20 }}>🖥️</span>
@@ -4156,10 +6209,10 @@ export default function CLearnApp() {
         </div>
       </div>
 
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+      <div style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative", zIndex: 1 }}>
         {/* Sidebar */}
         {sidebar && (
-          <div style={{ width: 255, background: C.surface, borderLeft: `1px solid ${C.border}`, flexShrink: 0, overflowY: "auto", padding: "8px 0" }}>
+          <div style={{ width: 255, background: "rgba(10,8,32,0.85)", backdropFilter: "blur(12px)", borderLeft: `1px solid ${C.border}`, flexShrink: 0, overflowY: "auto", padding: "8px 0" }}>
             <button onClick={() => { setView("home"); }} style={{ width: "100%", textAlign: "right", padding: "10px 18px", background: view === "home" ? `${C.accent}18` : "transparent", border: "none", cursor: "pointer", color: view === "home" ? C.accent : C.muted, fontFamily: "inherit", fontWeight: 700, fontSize: 13, display: "flex", gap: 8, alignItems: "center", borderRight: view === "home" ? `3px solid ${C.accent}` : "3px solid transparent" }}>
               <span>🏠</span> דף הבית
             </button>
@@ -4191,7 +6244,7 @@ export default function CLearnApp() {
           {view === "home" && (
             <div>
               {/* Hero */}
-              <div style={{ background: `linear-gradient(135deg, ${C.card} 0%, #0f1a35 100%)`, borderRadius: 20, padding: "44px 40px", marginBottom: 32, border: `1px solid ${C.border}`, position: "relative", overflow: "hidden" }}>
+              <div style={{ background: "linear-gradient(135deg,rgba(30,15,80,0.9) 0%,rgba(20,10,60,0.85) 100%)", borderRadius: 20, padding: "44px 40px", marginBottom: 32, border: `1px solid ${C.border}`, position: "relative", overflow: "hidden", backdropFilter: "blur(8px)" }}>
                 <div style={{ position: "absolute", top: -40, left: -40, width: 200, height: 200, background: `${C.accent}06`, borderRadius: "50%", pointerEvents: "none" }} />
                 <div style={{ position: "absolute", bottom: -20, right: -20, width: 140, height: 140, background: `${C.accent2}06`, borderRadius: "50%", pointerEvents: "none" }} />
                 <div style={{ position: "relative" }}>
@@ -4220,7 +6273,7 @@ export default function CLearnApp() {
                 {[
                   { label: "פרקים", value: 18, icon: "📚", color: C.accent },
                   { label: "הושלמו", value: completed, icon: "✅", color: C.accent3 },
-                  { label: "בוחנים עברו", value: started, icon: "📝", color: C.accent2 },
+                  { label: "פרקים התחלתי", value: started, icon: "📝", color: C.accent2 },
                   { label: "ציון כולל", value: `${totalPct}%`, icon: "🏆", color: C.warn },
                 ].map((s, i) => (
                   <div key={i} style={{ background: C.card, borderRadius: 14, padding: 22, border: `1px solid ${C.border}`, textAlign: "center" }}>
@@ -4287,7 +6340,7 @@ export default function CLearnApp() {
                   </button>
                 )}
               </div>
-              <ChapterView chapter={selected} onProgress={onProgress} />
+              <ChapterView key={selected.id} chapter={selected} onProgress={onProgress} />
             </div>
           )}
         </div>
