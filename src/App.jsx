@@ -91,29 +91,25 @@ const LofiButton = () => {
   return (
     <div onClick={toggleMusic} title={playing ? "עצור מוזיקה" : "הפעל Lo-Fi"}
       style={{
-        position: "fixed", bottom: 28, left: 28, zIndex: 9999,
-        width: 56, height: 56, borderRadius: "50%",
-        background: playing ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "linear-gradient(135deg,#1a1040,#2d1b69)",
-        border: `2px solid ${playing ? "#a78bfa" : "#4c3a8a"}`,
+        position: "fixed", bottom: 28, right: 28, zIndex: 9999,
+        width: 58, height: 58, borderRadius: "50%",
+        background: "linear-gradient(135deg,#2a1f0e,#3d2c10)",
+        border: "2px solid #c8a84b",
         cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-        animation: playing ? "lofiPulse 2s ease-in-out infinite" : "none",
-        transition: "all 0.3s ease", flexDirection: "column", gap: 3,
+        boxShadow: playing
+          ? "0 0 0 4px rgba(200,168,75,0.25), 0 0 18px rgba(200,168,75,0.35)"
+          : "0 2px 12px rgba(0,0,0,0.5)",
+        transition: "all 0.3s ease",
       }}>
       {playing ? (
-        <div style={{ display: "flex", gap: 3, alignItems: "flex-end", height: 22 }}>
+        <div style={{ display: "flex", gap: 3, alignItems: "flex-end", height: 24 }}>
           {["barDance1 0.8s ease-in-out infinite","barDance2 0.9s 0.1s ease-in-out infinite","barDance3 0.7s 0.2s ease-in-out infinite","barDance4 1s 0.05s ease-in-out infinite"].map((anim, i) => (
-            <div key={i} style={{ width: 4, borderRadius: 2, background: "linear-gradient(to top,#f472b6,#c084fc)", animation: anim }} />
+            <div key={i} style={{ width: 4, borderRadius: 2, background: "linear-gradient(to top,#c8a84b,#f0d070)", animation: anim }} />
           ))}
         </div>
       ) : (
-        <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#4c1d95,#6d28d9)", border: "2px solid #7c3aed", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#a78bfa" }} />
-          <div style={{ position: "absolute", inset: 3, borderRadius: "50%", border: "1px solid rgba(167,139,250,0.3)" }} />
-        </div>
+        <span style={{ fontSize: 26, color: "#c8a84b", lineHeight: 1, userSelect: "none" }}>♪</span>
       )}
-      <div style={{ fontSize: 8, color: playing ? "#e9d5ff" : "#7c6ab0", fontWeight: 700, letterSpacing: 0.5 }}>
-        {playing ? "LO-FI" : "♪"}
-      </div>
     </div>
   );
 };
